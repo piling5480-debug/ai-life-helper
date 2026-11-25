@@ -1,0 +1,24 @@
+{
+  "name": "AI 生活小幫手｜碧玲のAI生活研究室",
+  "short_name": "AI生活小幫手",
+  "description": "拍照翻譯、看懂帳單、LINE 訊息、排行程、設提醒…台灣人日常 10 件事，一個 AI App 搞定。",
+  "lang": "zh-Hant-TW",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF6E0",
+  "theme_color": "#FFF6E0",
+  "categories": ["productivity", "utilities", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "拍照翻譯", "url": "./?s=1", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "寫 LINE 訊息", "url": "./?s=3", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "設提醒", "url": "./?s=10", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

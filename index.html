@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AI生活小幫手">
+<meta name="description" content="拍照翻譯、看懂帳單、LINE 訊息、排行程、設提醒…台灣人日常 10 件事，一個 AI App 搞定。">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>AI 生活小幫手｜台灣人日常 10 件事</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#26221f;--bg:#FFF6E0;--paper:#FFFDF7;--yellow:#FFD84D;--pink:#FF6FA0;--muted:#6f655c;--line:#06C755}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,-apple-system,sans-serif}
+body{min-height:100vh;background-image:radial-gradient(#efdcae 1.2px,transparent 1.2px);background-size:18px 18px}
+button,input,textarea,select{font-family:inherit;color:inherit}
+.wrap{max-width:780px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(36px + env(safe-area-inset-bottom))}
+
+/* Header */
+header{position:relative;text-align:center;padding:8px 0 4px}
+.brand{display:inline-block;font-size:12px;font-weight:700;background:var(--ink);color:#fff;padding:5px 14px;border-radius:99px;letter-spacing:.08em}
+h1{font-size:clamp(28px,7.6vw,46px);font-weight:900;line-height:1.18;margin:14px 0 4px;letter-spacing:.02em}
+h1 .hl{background:linear-gradient(transparent 58%,var(--yellow) 58%);padding:0 4px}
+h1 .num{color:var(--pink);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;font-size:1.3em;font-style:italic;padding:0 2px}
+.sub{display:inline-block;margin-top:10px;background:#EDE4FF;border:2.5px solid var(--ink);border-radius:99px;padding:8px 18px;font-weight:700;font-size:15px;box-shadow:3px 3px 0 var(--ink)}
+.gear{position:absolute;right:0;top:0;width:44px;height:44px;border-radius:14px;border:2.5px solid var(--ink);background:#fff;box-shadow:3px 3px 0 var(--ink);font-size:20px;cursor:pointer}
+.gear:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
+@media(max-width:540px){.grid{grid-template-columns:1fr}}
+.card{position:relative;display:flex;gap:12px;align-items:flex-start;text-align:left;padding:16px 14px 16px 16px;border:2.5px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s;min-height:118px;width:100%}
+.card:hover{transform:translate(-1px,-2px);box-shadow:5px 6px 0 var(--ink)}
+.card:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.badge{flex:none;width:38px;height:38px;border-radius:50%;background:var(--yellow);border:2.5px solid var(--ink);display:grid;place-items:center;font-weight:900;font-size:17px}
+.card .txt{flex:1;min-width:0}
+.card h3{margin:2px 0 6px;font-size:19px;font-weight:900}
+.card h3 small{font-size:13px;font-weight:700;color:var(--muted);margin-left:4px}
+.card p{margin:0;font-size:14.5px;line-height:1.55;font-weight:500}
+.card .ico{flex:none;font-size:40px;line-height:1;align-self:center;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.12))}
+.slogan{margin:28px 0 10px;text-align:center;font-weight:900;font-size:clamp(17px,4.6vw,22px)}
+.slogan span{background:var(--yellow);border:2.5px solid var(--ink);padding:8px 16px;border-radius:14px;display:inline-block;box-shadow:3px 3px 0 var(--ink)}
+.note{text-align:center;font-size:12.5px;color:var(--muted);line-height:1.7}
+
+/* Chat sheet */
+.sheet{position:fixed;inset:0;background:var(--paper);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:20}
+.sheet.open{transform:none}
+.topbar{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:2.5px solid var(--ink)}
+.topbar .back{width:40px;height:40px;border-radius:12px;border:2.5px solid var(--ink);background:#fff;font-size:20px;cursor:pointer;flex:none}
+.topbar .t{flex:1;min-width:0;font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar select{border:2.5px solid var(--ink);border-radius:12px;padding:7px 8px;background:#fff;font-weight:700;font-size:14px}
+.msgs{flex:1;overflow-y:auto;padding:16px 14px 8px;max-width:780px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch}
+.msg{display:flex;margin:0 0 14px}
+.msg.u{justify-content:flex-end}
+.bub{max-width:86%;padding:11px 14px;border:2.5px solid var(--ink);border-radius:18px;font-size:15.5px;line-height:1.7;word-break:break-word}
+.msg.u .bub{background:#DDF0FF;border-bottom-right-radius:6px}
+.msg.b .bub{background:#fff;border-bottom-left-radius:6px;box-shadow:3px 3px 0 var(--ink)}
+.bub p{margin:0 0 6px}.bub p:last-child{margin-bottom:0}
+.bub ul,.bub ol{margin:4px 0 8px;padding-left:22px}.bub li{margin:2px 0}
+.bub h4{margin:10px 0 4px;font-size:16px;font-weight:900}
+.bub pre{background:#f6f1e6;border-radius:10px;padding:10px;overflow-x:auto;font-size:13.5px;white-space:pre-wrap}
+.bub code{background:#f6f1e6;padding:1px 5px;border-radius:6px;font-size:.92em}
+.bub hr{border:0;border-top:2px dashed #d9cdb6;margin:10px 0}
+.bub .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.bub .thumbs img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:2px solid var(--ink)}
+.pdfchip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:4px 8px;font-size:13px;font-weight:700}
+.err{color:#c62828;font-weight:700}
+.typing{display:inline-flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink);opacity:.3;animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{opacity:1}}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.act{border:2px solid var(--ink);background:#FFF4CC;border-radius:99px;padding:6px 12px;font-size:13.5px;font-weight:700;cursor:pointer;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:4px}
+.act.line{background:var(--line);color:#fff}
+.act:active{transform:translate(1px,1px)}
+.evs{margin-top:10px;border:2px dashed var(--ink);border-radius:14px;padding:10px 12px;background:#FFFBEA}
+.evs b{display:block;margin-bottom:4px}
+.ev{font-size:14px;padding:3px 0}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 14px 4px;max-width:780px;width:100%;margin:0 auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:2px solid var(--ink);background:#fff;border-radius:99px;padding:7px 13px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.pend{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px;max-width:780px;width:100%;margin:0 auto}
+.pi{position:relative}
+.pi img{width:64px;height:64px;object-fit:cover;border-radius:12px;border:2.5px solid var(--ink);display:block}
+.pi .x{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:#fff;font-size:12px;font-weight:900;cursor:pointer;line-height:1}
+.inbar{display:flex;align-items:flex-end;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));max-width:780px;width:100%;margin:0 auto}
+.ib{flex:none;width:44px;height:44px;border-radius:14px;border:2.5px solid var(--ink);background:#fff;font-size:20px;cursor:pointer}
+.ib.rec{background:var(--pink);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.ib.send{background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
+.ib:disabled{opacity:.45}
+textarea#ta{flex:1;min-width:0;resize:none;border:2.5px solid var(--ink);border-radius:16px;padding:10px 12px;font-size:16px;line-height:1.5;max-height:140px;background:#fff;outline:none}
+textarea#ta:focus{box-shadow:0 0 0 3px #FFD84D88}
+
+/* Settings */
+.modal{position:fixed;inset:0;background:rgba(38,34,31,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+.modal.open{display:flex}
+.panel{background:var(--paper);border:2.5px solid var(--ink);border-radius:22px;box-shadow:5px 5px 0 var(--ink);padding:20px;width:100%;max-width:440px;max-height:90vh;overflow:auto}
+.panel h2{margin:0 0 12px;font-size:20px;font-weight:900}
+.panel label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
+.panel input[type=text],.panel input[type=password],.panel input[type=url]{width:100%;border:2.5px solid var(--ink);border-radius:12px;padding:9px 11px;font-size:15px;background:#fff}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;margin:0;border:2.5px solid var(--ink);border-radius:12px;padding:9px;text-align:center;cursor:pointer;background:#fff;font-size:14px}
+.seg input{display:none}
+.seg input:checked+span{font-weight:900}
+.seg label:has(input:checked){background:var(--yellow)}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+.row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;border:2.5px solid var(--ink);border-radius:14px;padding:11px;font-weight:900;font-size:15px;cursor:pointer;background:#fff;box-shadow:3px 3px 0 var(--ink)}
+.btn.pri{background:var(--yellow)}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.hidden{display:none!important}
+.install{display:flex;align-items:center;gap:12px;margin:18px auto 0;max-width:520px;background:#fff;border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--ink);padding:12px 14px;text-align:left}
+.install img{width:48px;height:48px;border-radius:12px;border:2px solid var(--ink)}
+.install div{flex:1;font-size:14px;line-height:1.5}.install b{font-size:15px}
+.install button{border:2.5px solid var(--ink);background:var(--yellow);border-radius:12px;padding:9px 14px;font-weight:900;cursor:pointer;flex:none}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <button class="gear" id="gearBtn" aria-label="設定">⚙️</button>
+    <span class="brand">碧玲のAI生活研究室</span>
+    <h1>一支手機搞定<br><span class="hl">台灣人日常</span> <span class="num">10</span> 件事</h1>
+    <div class="sub">點一下情境，拍照、講話、打字都可以 👇</div>
+  </header>
+  <div class="install hidden" id="installBar">
+    <img src="icons/icon-192.png" alt="">
+    <div><b>安裝到手機</b><br><span id="installTip">像 App 一樣從桌面打開，全螢幕更好用</span></div>
+    <button id="installBtn">安裝</button>
+  </div>
+  <main class="grid" id="grid"></main>
+  <div class="slogan"><span>最好用的 App，就是隨手打開就會用的那一個。</span></div>
+  <p class="note">AI 回答僅供參考；路線、班次、帳單金額請以官方資訊為準。<br>可用瀏覽器「加入主畫面」，像 App 一樣開啟。</p>
+</div>
+
+<!-- Chat -->
+<section class="sheet" id="sheet" aria-hidden="true">
+  <div class="topbar">
+    <button class="back" id="backBtn" aria-label="返回">←</button>
+    <div class="t" id="sceneTitle"></div>
+    <select id="langSel" class="hidden" aria-label="練習語言">
+      <option value="en-US">英文</option>
+      <option value="ja-JP">日文</option>
+      <option value="ko-KR">韓文</option>
+    </select>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="chips" id="chips"></div>
+  <div class="pend" id="pend"></div>
+  <div class="inbar">
+    <button class="ib" id="camBtn" aria-label="拍照">📷</button>
+    <button class="ib" id="fileBtn" aria-label="上傳檔案">📎</button>
+    <textarea id="ta" rows="1" placeholder="輸入訊息…"></textarea>
+    <button class="ib" id="micBtn" aria-label="語音輸入">🎤</button>
+    <button class="ib send" id="sendBtn" aria-label="送出">➤</button>
+  </div>
+  <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+  <input type="file" id="fileInput" multiple hidden>
+</section>
+
+<!-- Settings -->
+<div class="modal" id="modal">
+  <div class="panel">
+    <h2>⚙️ 連線設定</h2>
+    <label>連線方式</label>
+    <div class="seg">
+      <label><input type="radio" name="mode" value="worker"><span>Cloudflare Worker（建議）</span></label>
+      <label><input type="radio" name="mode" value="direct"><span>自己的 API Key</span></label>
+    </div>
+    <div id="workerBox">
+      <label for="workerUrl">Worker 網址</label>
+      <input type="url" id="workerUrl" placeholder="https://ai-helper.你的帳號.workers.dev">
+      <label for="accessCode">存取碼（若 Worker 有設定）</label>
+      <input type="password" id="accessCode" placeholder="選填">
+      <p class="hint">API Key 放在 Worker 裡，分享給別人用也不會外洩。</p>
+    </div>
+    <div id="directBox">
+      <label for="apiKey">Claude API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-...">
+      <label for="model">模型</label>
+      <input type="text" id="model" placeholder="claude-sonnet-5-5">
+      <p class="hint">⚠️ Key 只存在這台裝置的瀏覽器，適合自己測試；要分享給別人請改用 Worker。</p>
+    </div>
+    <div class="row">
+      <button class="btn" id="cancelSet">取消</button>
+      <button class="btn pri" id="saveSet">儲存</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_MODEL = 'claude-sonnet-5-5';
+
+const CAL_RULE = '如果內容包含要放進行事曆的行程或提醒：先用條列清楚說明安排，最後另外附上一個 ```json 程式碼區塊，格式為 {"events":[{"title":"標題","start":"YYYY-MM-DDTHH:mm","end":"YYYY-MM-DDTHH:mm","rrule":"","description":"備註"}]}。時間一律是台灣時間；重複事件的 rrule 用 iCalendar 格式（例如每月 25 號：FREQ=MONTHLY;BYMONTHDAY=25），不重複就給空字串。「明天」「下週一」等請依現在時間推算成實際日期；使用者沒說時間的提醒預設早上 9:00，長度 15 分鐘。';
+
+const SCENES = [
+  { title:'拍照翻譯', tag:'開鏡頭', icon:'🍜', color:'#FFE3EC',
+    example:'這張菜單翻成中文，推薦兩道',
+    chips:['這張菜單翻成中文，推薦兩道','這個說明書在寫什麼？','幫我翻譯這個告示牌'],
+    welcome:'拍一下菜單、招牌或說明書，我幫你翻成中文 📸',
+    accept:'image/*', camera:true,
+    sys:'你負責把照片中的外文（日文、韓文、英文、泰文等）翻成台灣繁體中文。菜單要列出「原文 → 中文 → 簡短說明」，價格附上約略新台幣換算（註明為估算匯率），最後依使用者需求推薦菜色並說明理由。看不清楚的字要老實說。' },
+  { title:'看懂帳單', tag:'拍帳單', icon:'⚡', color:'#DFF5F2',
+    example:'這期電費為什麼比上期貴？',
+    chips:['這期電費為什麼比上期貴？','幫我看這張電信帳單有沒有多收','這張繳費單的期限跟金額是多少？'],
+    welcome:'拍台電電費單、水費單或電信帳單，我幫你看懂每一項 💡',
+    accept:'image/*,application/pdf', camera:true,
+    sys:'你擅長解讀台灣的各種帳單（台電電費單、自來水、瓦斯、電信、信用卡帳單）。先抓出：應繳金額、繳費期限、計費期間、用量。比較差異時說明原因（例如台電累進費率、夏月 6–9 月電價較高、計費天數不同）。最後給 2–3 個實用省錢建議。照片看不到的數字不要編造。' },
+  { title:'寫訊息', tag:'LINE 直接傳', icon:'💬', color:'#E1EEFF',
+    example:'幫我寫一則有禮貌的請假訊息給主管',
+    chips:['幫我寫一則有禮貌的請假訊息給主管','幫我回覆家族群組，婉拒這週聚餐','寫一則生日祝福給客戶'],
+    welcome:'想傳什麼訊息？說給我聽，寫好可以一鍵用 LINE 傳出去 ✉️',
+    accept:'image/*', camera:false, line:true,
+    sys:'你幫使用者寫要用 LINE 傳出的訊息。只輸出可以直接複製傳送的訊息本文，不要加任何前言、標題或說明。語氣符合台灣職場／家庭習慣，自然、有禮貌、不要太長；可適度加 1–2 個表情符號（給主管或客戶就少用）。使用者若要修改，就直接給修改後的完整版本。' },
+  { title:'排行程', tag:'加入行事曆', icon:'📅', color:'#FFF4CC',
+    example:'幫我把明天的事情排進行事曆',
+    chips:['明天 9 點開會、中午跟客戶吃飯、下午 3 點半接小孩','下週六早上帶爸媽去回診，幫我排好','這週五下班後去健身 1 小時'],
+    welcome:'跟我說你要做哪些事，我幫你排好時間，還能一鍵加入行事曆 🗓️',
+    accept:'image/*', camera:false, cal:true,
+    sys:'你是行程秘書，幫使用者把待辦排成合理的時間表，考慮台灣交通與用餐時間，事件之間保留緩衝。' + CAL_RULE },
+  { title:'讀郵件', tag:'貼上郵件', icon:'📧', color:'#E6F7E1',
+    example:'幫我抓出這封信的報價跟期限，並擬回信',
+    chips:['幫我抓出這封信的報價跟期限，並擬回信','這封英文信在說什麼？用中文講重點','幫我寫一封禮貌的催款信'],
+    welcome:'把郵件內容貼上來（或截圖），我幫你抓重點、擬回信 📬',
+    accept:'image/*,application/pdf', camera:false,
+    sys:'你幫使用者處理電子郵件。先用條列抓出重點：寄件人要什麼、金額／報價、期限、需要我做的事。需要回信時，附上一封可直接使用的回信草稿（語言與原信相同，商務語氣）。' },
+  { title:'讀文件', tag:'上傳 PDF', icon:'📄', color:'#EFE6FF',
+    example:'用三句話講重點',
+    chips:['用三句話講重點','這份合約有哪些要注意的地方？','整理成會議可以用的條列重點'],
+    welcome:'上傳 PDF 或拍文件，我幫你濃縮成重點 📑',
+    accept:'application/pdf,image/*', camera:true,
+    sys:'你幫使用者快速讀懂文件（PDF、公文、合約、說明書、學校通知）。依使用者要求的長度整理重點；合約類要特別標出金額、期限、違約或自動續約等風險條款。提醒這不是法律意見。' },
+  { title:'規劃路線', tag:'捷運出遊', icon:'🚇', color:'#FFEBD9',
+    example:'週末帶小孩搭台北捷運出去，排半天行程',
+    chips:['週末帶小孩搭台北捷運出去，排半天行程','高雄輕軌沿線一日遊怎麼走？','下雨天台中室內親子景點路線'],
+    welcome:'想去哪、跟誰去、有多少時間？我幫你排捷運／公車／YouBike 路線 🗺️',
+    accept:'image/*', camera:false, cal:true,
+    sys:'你熟悉台灣的大眾運輸（台北／新北／桃園／台中／高雄捷運、輕軌、台鐵、公車、YouBike）與親子景點。依出發地、人數、時間排出順暢的路線：每站寫出「交通方式、約略時間、在那裡做什麼」，考慮小孩體力、午餐、廁所。提醒班次與營業時間請以官方 App（如台北捷運 Go、Google 地圖）為準。' + CAL_RULE },
+  { title:'練語言', tag:'開語音', icon:'🗣️', color:'#FFE0F0',
+    example:'陪我練 10 分鐘英文對話',
+    chips:['陪我練英文，情境是在咖啡廳點餐','模擬日本旅遊問路','練面試自我介紹'],
+    welcome:'選好右上角的語言，按 🎤 直接開口講，我會陪你對話並唸給你聽 🎧',
+    accept:null, camera:false, tts:true, lang:true,
+    sys:'' },
+  { title:'認東西', tag:'開鏡頭', icon:'🌿', color:'#E8E4FF',
+    example:'這是什麼植物？要怎麼照顧？',
+    chips:['這是什麼植物？要怎麼照顧？','這是什麼蟲？會咬人嗎？','這個零件叫什麼？哪裡買？'],
+    welcome:'拍下植物、昆蟲或不認識的東西，我告訴你它是什麼 🔍',
+    accept:'image/*', camera:true,
+    sys:'你幫使用者辨識照片中的植物、昆蟲、食物或物品。先給最可能的名稱（附可信度：高／中／低），再提供實用資訊。植物要給適合台灣氣候（潮濕、夏季炎熱、颱風）的照顧方式：光照、澆水頻率、常見問題。可能有毒或危險的東西要特別提醒。不確定就說不確定。' },
+  { title:'設提醒', tag:'每月自動', icon:'⏰', color:'#DDF0FF',
+    example:'每個月 25 號提醒我繳電費',
+    chips:['每個月 25 號提醒我繳電費','每週三晚上 8 點提醒我倒資源回收','5 月提醒我報綜所稅'],
+    welcome:'要我提醒你什麼？說一聲，我幫你做成手機行事曆提醒 🔔',
+    accept:null, camera:false, cal:true,
+    sys:'你幫使用者設定提醒。用一兩句話確認提醒內容與時間，注意台灣常見的期限（例如綜所稅 5 月申報、牌照稅 4 月、燃料費 7 月、台電電費約兩個月一期）。' + CAL_RULE },
+];
+
+const LANGS = {'en-US':'英文','ja-JP':'日文','ko-KR':'韓文'};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let settings = loadSettings();
+let scene = null, history = [], pending = [], busy = false;
+
+/* ---------- storage ---------- */
+function loadSettings(){
+  try { return Object.assign({mode:'worker',workerUrl:'',accessCode:'',apiKey:'',model:DEFAULT_MODEL}, JSON.parse(localStorage.getItem('aiHelperSettings')||'{}')); }
+  catch { return {mode:'worker',workerUrl:'',accessCode:'',apiKey:'',model:DEFAULT_MODEL}; }
+}
+function saveSettings(){ try { localStorage.setItem('aiHelperSettings', JSON.stringify(settings)); } catch {} }
+const configured = () => settings.mode === 'direct' ? !!settings.apiKey : !!settings.workerUrl;
+
+/* ---------- home grid ---------- */
+$('#grid').innerHTML = SCENES.map((s,i)=>`
+  <button class="card" style="background:${s.color}" data-i="${i}">
+    <span class="badge">${i+1}</span>
+    <span class="txt"><h3>${s.title}<small>｜${s.tag}</small></h3><p>「${s.example}」</p></span>
+    <span class="ico">${s.icon}</span>
+  </button>`).join('');
+$('#grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openScene(SCENES[+c.dataset.i]); });
+
+/* ---------- scene ---------- */
+function openScene(s){
+  scene = s; history = []; pending = []; renderPending();
+  $('#sceneTitle').textContent = `${s.icon} ${s.title}`;
+  $('#langSel').classList.toggle('hidden', !s.lang);
+  $('#camBtn').classList.toggle('hidden', !s.camera);
+  $('#fileBtn').classList.toggle('hidden', !s.accept);
+  $('#fileInput').accept = s.accept || '';
+  $('#msgs').innerHTML = '';
+  addBot(s.welcome);
+  $('#chips').innerHTML = s.chips.map(c=>`<button class="chip">${esc(c)}</button>`).join('');
+  $('#ta').value = ''; $('#ta').placeholder = `例如：${s.example}`;
+  $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden','false');
+  history_push();
+}
+function closeScene(){
+  $('#sheet').classList.remove('open'); $('#sheet').setAttribute('aria-hidden','true');
+  try { speechSynthesis.cancel(); } catch {}
+  stopRec();
+}
+function history_push(){ try { window.history.pushState({chat:1},''); } catch {} }
+window.addEventListener('popstate', () => { if ($('#sheet').classList.contains('open')) closeScene(); });
+$('#backBtn').onclick = () => { try { window.history.back(); } catch { closeScene(); } setTimeout(()=>{ if($('#sheet').classList.contains('open')) closeScene(); },120); };
+$('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; $('#ta').value = c.textContent; autosize(); $('#ta').focus(); });
+
+/* ---------- system prompt ---------- */
+function nowTW(){
+  const d = new Date(Date.now() + 8*3600e3);
+  const wk = ['日','一','二','三','四','五','六'][d.getUTCDay()];
+  return d.toISOString().slice(0,16).replace('T',' ') + `（星期${wk}）`;
+}
+function systemPrompt(){
+  let sys = `你是「AI 生活小幫手」，服務在台灣生活的使用者。一律使用台灣繁體中文與台灣慣用語（例如：訊息、行事曆、捷運、悠遊卡、統一發票）。回答簡潔、口語、好讀，多用條列，手機上一眼看得懂。現在時間：${nowTW()}，時區 Asia/Taipei。\n\n`;
+  if (scene.lang) {
+    const L = LANGS[$('#langSel').value];
+    sys += `你是親切的${L}會話陪練老師。依使用者指定的情境進行角色扮演對話，一次只說 1–3 句${L}，難度配合使用者程度。每次回覆格式固定：先寫你的${L}台詞；接著一行只有 ---；下面用繁體中文給：①台詞的中文意思 ②若使用者剛剛的${L}有錯，溫和指出並給更自然的說法 ③一個提示：使用者下一句可以怎麼回。使用者用中文講也沒關係，幫他翻成${L}再繼續對話。`;
+  } else sys += scene.sys;
+  return sys;
+}
+
+/* ---------- attachments ---------- */
+$('#camBtn').onclick = () => $('#camInput').click();
+$('#fileBtn').onclick = () => $('#fileInput').click();
+$('#camInput').onchange = e => { addFiles(e.target.files); e.target.value=''; };
+$('#fileInput').onchange = e => { addFiles(e.target.files); e.target.value=''; };
+
+function readB64(file){ return new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(String(r.result).split(',')[1]); r.onerror=()=>no(new Error('檔案讀取失敗')); r.readAsDataURL(file); }); }
+function compress(file){
+  return new Promise((ok,no)=>{
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const M = 1600, r = Math.min(1, M/Math.max(img.width,img.height));
+      const w = Math.round(img.width*r), h = Math.round(img.height*r);
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      const ctx = c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+      const url = c.toDataURL('image/jpeg', .85); URL.revokeObjectURL(u);
+      ok({url, data:url.split(',')[1]});
+    };
+    img.onerror = () => no(new Error('這張圖片無法讀取'));
+    img.src = u;
+  });
+}
+async function addFiles(files){
+  for (const f of files) {
+    try {
+      if (f.type === 'application/pdf') {
+        if (f.size > 20e6) { toast('PDF 太大了（上限約 20MB）'); continue; }
+        pending.push({kind:'pdf', name:f.name, block:{type:'document', source:{type:'base64', media_type:'application/pdf', data:await readB64(f)}}});
+      } else if (f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name)) {
+        const {url,data} = await compress(f);
+        pending.push({kind:'img', url, block:{type:'image', source:{type:'base64', media_type:'image/jpeg', data}}});
+      } else toast('只支援圖片或 PDF 喔');
+    } catch(err){ toast(err.message); }
+  }
+  renderPending();
+}
+function renderPending(){
+  $('#pend').innerHTML = pending.map((p,i)=> p.kind==='img'
+    ? `<div class="pi"><img src="${p.url}" alt=""><button class="x" data-i="${i}">✕</button></div>`
+    : `<div class="pi"><span class="pdfchip">📄 ${esc(p.name)}</span><button class="x" data-i="${i}">✕</button></div>`).join('');
+}
+$('#pend').addEventListener('click', e => { const x = e.target.closest('.x'); if (!x) return; pending.splice(+x.dataset.i,1); renderPending(); });
+
+/* ---------- markdown (light) ---------- */
+function inline(s){ return s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>'); }
+function md(src){
+  const blocks = [];
+  let h = esc(src).replace(/```\w*\n?([\s\S]*?)```/g, (m,c)=>{ blocks.push(c); return `\u0000${blocks.length-1}\u0000`; });
+  let out = '', list = null;
+  const close = () => { if (list) { out += `</${list}>`; list = null; } };
+  for (const ln of h.split('\n')) {
+    let m;
+    if ((m = ln.match(/^\s*[-*•]\s+(.*)/))) { if (list!=='ul'){ close(); out+='<ul>'; list='ul'; } out += `<li>${inline(m[1])}</li>`; continue; }
+    if ((m = ln.match(/^\s*\d+[.)、]\s+(.*)/))) { if (list!=='ol'){ close(); out+='<ol>'; list='ol'; } out += `<li>${inline(m[1])}</li>`; continue; }
+    close();
+    if ((m = ln.match(/^\u0000(\d+)\u0000$/))) out += `<pre>${blocks[+m[1]]}</pre>`;
+    else if ((m = ln.match(/^#{1,4}\s+(.*)/))) out += `<h4>${inline(m[1])}</h4>`;
+    else if (/^\s*(---|___|\*\*\*)\s*$/.test(ln)) out += '<hr>';
+    else if (ln.trim()) out += `<p>${inline(ln.replace(/\u0000(\d+)\u0000/g,(x,i)=>'<code>'+blocks[+i]+'</code>'))}</p>`;
+  }
+  close(); return out;
+}
+const stripJson = t => t.replace(/```json[\s\S]*?(```|$)/g,'').trim();
+
+/* ---------- bubbles ---------- */
+function scrollEnd(){ const m=$('#msgs'); m.scrollTop = m.scrollHeight; }
+function addUser(text, atts){
+  const thumbs = atts.filter(a=>a.kind==='img').map(a=>`<img src="${a.url}" alt="">`).join('');
+  const pdfs = atts.filter(a=>a.kind==='pdf').map(a=>`<span class="pdfchip">📄 ${esc(a.name)}</span>`).join(' ');
+  const el = document.createElement('div'); el.className='msg u';
+  el.innerHTML = `<div class="bub">${thumbs?`<div class="thumbs">${thumbs}</div>`:''}${pdfs?`<div class="thumbs">${pdfs}</div>`:''}${text?md(text):''}</div>`;
+  $('#msgs').appendChild(el); scrollEnd();
+}
+function addBot(text){
+  const el = document.createElement('div'); el.className='msg b';
+  el.innerHTML = `<div class="bub"><div class="body">${text===null?'<span class="typing"><i></i><i></i><i></i></span>':md(text)}</div></div>`;
+  $('#msgs').appendChild(el); scrollEnd();
+  return el.querySelector('.bub');
+}
+
+/* ---------- send ---------- */
+$('#sendBtn').onclick = send;
+$('#ta').addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey && !e.isComposing && e.keyCode!==229 && matchMedia('(hover:hover)').matches) { e.preventDefault(); send(); } });
+$('#ta').addEventListener('input', autosize);
+function autosize(){ const t=$('#ta'); t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,140)+'px'; }
+
+async function send(){
+  if (busy) return;
+  stopRec();
+  let text = $('#ta').value.trim();
+  if (!text && !pending.length) { $('#ta').focus(); return; }
+  if (!configured()) { openSettings(); toast('請先完成連線設定'); return; }
+  if (!text) text = scene.example;
+  const atts = pending; pending = []; renderPending();
+  const content = [...atts.map(a=>a.block), {type:'text', text}];
+  history.push({role:'user', content});
+  addUser($('#ta').value.trim(), atts);
+  $('#ta').value=''; autosize();
+  busy = true; $('#sendBtn').disabled = true;
+  const bub = addBot(null), body = bub.querySelector('.body');
+  let full = '';
+  try {
+    await callAPI(systemPrompt(), history, t => { full += t; body.innerHTML = md(stripJson(full)) || '<span class="typing"><i></i><i></i><i></i></span>'; scrollEnd(); });
+    if (!full.trim()) full = '（沒有收到回應，請再試一次）';
+    history.push({role:'assistant', content: full});
+    finalize(bub, full);
+  } catch(err){
+    history.pop();
+    body.innerHTML = `<p class="err">⚠️ ${esc(err.message || '連線失敗')}</p>`;
+  } finally { busy = false; $('#sendBtn').disabled = false; scrollEnd(); }
+}
+
+async function callAPI(system, messages, onText){
+  const s = settings; let res;
+  const base = {system, messages, max_tokens: 2000};
+  try {
+    if (s.mode === 'direct') {
+      res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
+        headers:{'content-type':'application/json','x-api-key':s.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body: JSON.stringify({...base, model: s.model || DEFAULT_MODEL, stream:true}) });
+    } else {
+      res = await fetch(s.workerUrl, { method:'POST', headers:{'content-type':'application/json','x-access-code':s.accessCode||''}, body: JSON.stringify(base) });
+    }
+  } catch { throw new Error('連不上伺服器，請檢查網路或 Worker 網址'); }
+  if (!res.ok) {
+    let msg = `錯誤 ${res.status}`;
+    try { const j = await res.json(); msg = j.error?.message || msg; } catch {}
+    if (res.status === 401) msg = 'API Key 或存取碼不正確（' + msg + '）';
+    throw new Error(msg);
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+  for (;;) {
+    const {done, value} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      const d = line.slice(5).trim(); if (!d) continue;
+      let j; try { j = JSON.parse(d); } catch { continue; }
+      if (j.type === 'content_block_delta' && j.delta?.type === 'text_delta') onText(j.delta.text);
+      else if (j.type === 'error') throw new Error(j.error?.message || '伺服器錯誤');
+    }
+  }
+}
+
+/* ---------- after reply: actions ---------- */
+function finalize(bub, full){
+  const shown = stripJson(full);
+  const acts = document.createElement('div'); acts.className = 'acts';
+  const btn = (label, fn, cls='') => { const b=document.createElement('button'); b.className='act '+cls; b.innerHTML=label; b.onclick=fn; acts.appendChild(b); return b; };
+
+  btn('📋 複製', async () => { try { await navigator.clipboard.writeText(shown); toast('已複製'); } catch { toast('複製失敗，請長按文字複製'); } });
+  if (scene.line) {
+    const a = document.createElement('a'); a.className='act line'; a.target='_blank'; a.rel='noopener';
+    a.href = 'https://line.me/R/share?text=' + encodeURIComponent(shown); a.innerHTML='💚 用 LINE 傳送'; acts.appendChild(a);
+  }
+  if (scene.tts) { speak(shown); btn('🔊 再聽一次', () => speak(shown)); }
+
+  const evs = parseEvents(full);
+  if (evs.length) {
+    const box = document.createElement('div'); box.className='evs';
+    box.innerHTML = '<b>📅 可加入行事曆</b>' + evs.map(e=>`<div class="ev">• ${esc(e.title)}｜${esc(e.start.replace('T',' '))}${e.rrule?'（重複）':''}</div>`).join('');
+    bub.appendChild(box);
+    btn('⬇️ 加入手機行事曆（.ics）', () => downloadICS(evs));
+    evs.forEach(e => { const a=document.createElement('a'); a.className='act'; a.target='_blank'; a.rel='noopener'; a.href=gcalLink(e); a.innerHTML='🗓️ Google 日曆：'+esc(e.title.slice(0,10)); acts.appendChild(a); });
+  }
+  bub.appendChild(acts);
+}
+
+/* ---------- calendar ---------- */
+function parseEvents(t){
+  const m = t.match(/```json\s*([\s\S]*?)```/); if (!m) return [];
+  try { const j = JSON.parse(m[1]); return (j.events||[]).filter(e => e && e.title && toUTC(e.start)); } catch { return []; }
+}
+function toUTC(s){ const m = String(s||'').match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/); return m ? new Date(Date.UTC(+m[1], m[2]-1, +m[3], m[4]-8, +m[5])) : null; }
+const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+const endOf = e => toUTC(e.end) || new Date(toUTC(e.start).getTime() + 36e5);
+const icsEsc = t => String(t||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
+function downloadICS(evs){
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AI Life Helper//TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  evs.forEach((e,i) => {
+    L.push('BEGIN:VEVENT', `UID:${Date.now()}-${i}@ai-life-helper`, 'DTSTAMP:'+fmt(new Date()), 'DTSTART:'+fmt(toUTC(e.start)), 'DTEND:'+fmt(endOf(e)), 'SUMMARY:'+icsEsc(e.title));
+    if (e.description) L.push('DESCRIPTION:'+icsEsc(e.description));
+    if (e.rrule) L.push('RRULE:'+String(e.rrule).replace(/^RRULE:/i,''));
+    L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(e.title),'TRIGGER:-PT10M','END:VALARM','END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  const blob = new Blob([L.join('\r\n')], {type:'text/calendar;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (evs.length===1?evs[0].title:'行程') + '.ics';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast('已產生行事曆檔，打開即可加入');
+}
+function gcalLink(e){
+  let u = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(e.title)
+    + '&dates=' + fmt(toUTC(e.start)) + '/' + fmt(endOf(e)) + '&ctz=Asia/Taipei';
+  if (e.description) u += '&details=' + encodeURIComponent(e.description);
+  if (e.rrule) u += '&recur=' + encodeURIComponent('RRULE:' + String(e.rrule).replace(/^RRULE:/i,''));
+  return u;
+}
+
+/* ---------- voice ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+if (!SR) $('#micBtn').classList.add('hidden');
+$('#micBtn').onclick = () => rec ? stopRec() : startRec();
+function startRec(){
+  if (!SR) return;
+  rec = new SR(); rec.lang = scene?.lang ? $('#langSel').value : 'zh-TW'; rec.interimResults = true; rec.continuous = false;
+  const before = $('#ta').value;
+  rec.onresult = e => { let t=''; for (const r of e.results) t += r[0].transcript; $('#ta').value = (before ? before+' ' : '') + t; autosize(); };
+  rec.onerror = e => { if (e.error==='not-allowed') toast('請允許麥克風權限'); stopRec(); };
+  rec.onend = () => { $('#micBtn').classList.remove('rec'); rec = null; };
+  try { rec.start(); $('#micBtn').classList.add('rec'); toast(rec.lang==='zh-TW'?'請說話…':`請用${LANGS[rec.lang]}說…（說中文也可以）`); } catch { rec = null; }
+}
+function stopRec(){ if (rec) { try { rec.stop(); } catch {} } $('#micBtn').classList.remove('rec'); rec = null; }
+function speak(text){
+  if (!('speechSynthesis' in window)) return;
+  const say = text.split(/\n\s*---\s*\n|\n---/)[0].replace(/[*#`]/g,'').trim();
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(say);
+  u.lang = scene?.lang ? $('#langSel').value : 'zh-TW'; u.rate = .95;
+  const v = speechSynthesis.getVoices().find(v => v.lang.replace('_','-').startsWith(u.lang)); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- settings ---------- */
+$('#gearBtn').onclick = openSettings;
+$('#cancelSet').onclick = () => $('#modal').classList.remove('open');
+$('#modal').addEventListener('click', e => { if (e.target.id==='modal') $('#modal').classList.remove('open'); });
+document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = syncMode);
+function syncMode(){ const m = document.querySelector('input[name=mode]:checked').value; $('#workerBox').classList.toggle('hidden', m!=='worker'); $('#directBox').classList.toggle('hidden', m!=='direct'); }
+function openSettings(){
+  document.querySelector(`input[name=mode][value=${settings.mode}]`).checked = true;
+  $('#workerUrl').value = settings.workerUrl; $('#accessCode').value = settings.accessCode;
+  $('#apiKey').value = settings.apiKey; $('#model').value = settings.model;
+  syncMode(); $('#modal').classList.add('open');
+}
+$('#saveSet').onclick = () => {
+  settings.mode = document.querySelector('input[name=mode]:checked').value;
+  settings.workerUrl = $('#workerUrl').value.trim(); settings.accessCode = $('#accessCode').value.trim();
+  settings.apiKey = $('#apiKey').value.trim(); settings.model = $('#model').value.trim() || DEFAULT_MODEL;
+  saveSettings(); $('#modal').classList.remove('open'); toast(configured() ? '設定已儲存 ✅' : '還沒填寫連線資訊喔');
+};
+
+/* ---------- toast ---------- */
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2200); }
+
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+
+/* 桌面捷徑：?s=1~10 直接開啟對應情境 */
+{ const n = +new URLSearchParams(location.search).get('s'); if (n >= 1 && n <= SCENES.length) openScene(SCENES[n-1]); }
+
+/* ---------- PWA：Android 安裝 / iPhone 加入主畫面 / 離線外殼 ---------- */
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; if (!standalone) $('#installBar').classList.remove('hidden'); });
+$('#installBtn').onclick = async () => {
+  if (deferredPrompt) { deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; deferredPrompt = null; if (r.outcome==='accepted') $('#installBar').classList.add('hidden'); }
+  else toast('請點瀏覽器的「分享」→「加入主畫面」');
+};
+window.addEventListener('appinstalled', () => { $('#installBar').classList.add('hidden'); toast('安裝完成！到桌面找「AI生活小幫手」'); });
+if (!standalone && /iPhone|iPad/.test(navigator.userAgent)) { $('#installTip').textContent = '點 Safari 下方「分享」→「加入主畫面」'; $('#installBtn').textContent = '怎麼裝'; $('#installBar').classList.remove('hidden'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+name: 部署 Cloudflare Worker
+
+on:
+  push:
+    branches: [main]
+    paths: ['worker/**', '.github/workflows/deploy-worker.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: 尚未設定 Cloudflare 金鑰
+        if: env.HAS_CF != 'true'
+        run: echo "::notice::請到 Settings → Secrets and variables → Actions 加入 CLOUDFLARE_API_TOKEN、CLOUDFLARE_ACCOUNT_ID、ANTHROPIC_API_KEY、ACCESS_CODE 後重新執行"
+      - name: 部署 Worker
+        if: env.HAS_CF == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          secrets: |
+            ANTHROPIC_API_KEY
+            ACCESS_CODE
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}

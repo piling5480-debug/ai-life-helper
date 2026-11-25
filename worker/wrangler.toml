@@ -1,0 +1,9 @@
+name = "ai-life-helper"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# 只允許你的 GitHub Pages 網站呼叫
+ALLOW_ORIGIN = "https://piling5480-debug.github.io"
+# 想省錢可改成 claude-haiku-5-5
+MODEL = "claude-sonnet-5-5"
