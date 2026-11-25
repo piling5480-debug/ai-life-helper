@@ -174,15 +174,15 @@ textarea#ta:focus{box-shadow:0 0 0 3px #FFD84D88}
     <h2>⚙️ 連線設定</h2>
     <label>連線方式</label>
     <div class="seg">
-      <label><input type="radio" name="mode" value="worker"><span>Cloudflare Worker（建議）</span></label>
+      <label><input type="radio" name="mode" value="worker"><span>內建伺服器（建議）</span></label>
       <label><input type="radio" name="mode" value="direct"><span>自己的 API Key</span></label>
     </div>
     <div id="workerBox">
-      <label for="workerUrl">Worker 網址</label>
-      <input type="url" id="workerUrl" placeholder="https://ai-helper.你的帳號.workers.dev">
-      <label for="accessCode">存取碼（若 Worker 有設定）</label>
-      <input type="password" id="accessCode" placeholder="選填">
-      <p class="hint">API Key 放在 Worker 裡，分享給別人用也不會外洩。</p>
+      <label for="accessCode">存取碼</label>
+      <input type="password" id="accessCode" placeholder="向老師或作者索取">
+      <label for="workerUrl">伺服器網址（一般不用改）</label>
+      <input type="text" id="workerUrl" placeholder="api/chat">
+      <p class="hint">AI 金鑰保管在伺服器端，大家直接使用就好，不需要自己的 API Key。</p>
     </div>
     <div id="directBox">
       <label for="apiKey">Claude API Key</label>
@@ -275,9 +275,12 @@ let settings = loadSettings();
 let scene = null, history = [], pending = [], busy = false;
 
 /* ---------- storage ---------- */
+const DEFAULT_API = 'api/chat'; // 同一個網站內建的 AI 代理，同學打開就能用
 function loadSettings(){
-  try { return Object.assign({mode:'worker',workerUrl:'',accessCode:'',apiKey:'',model:DEFAULT_MODEL}, JSON.parse(localStorage.getItem('aiHelperSettings')||'{}')); }
-  catch { return {mode:'worker',workerUrl:'',accessCode:'',apiKey:'',model:DEFAULT_MODEL}; }
+  const d = {mode:'worker',workerUrl:DEFAULT_API,accessCode:'',apiKey:'',model:DEFAULT_MODEL};
+  let s; try { s = Object.assign(d, JSON.parse(localStorage.getItem('aiHelperSettings')||'{}')); } catch { s = d; }
+  if (!s.workerUrl) s.workerUrl = DEFAULT_API;
+  return s;
 }
 function saveSettings(){ try { localStorage.setItem('aiHelperSettings', JSON.stringify(settings)); } catch {} }
 const configured = () => settings.mode === 'direct' ? !!settings.apiKey : !!settings.workerUrl;
@@ -458,7 +461,10 @@ async function callAPI(system, messages, onText){
   if (!res.ok) {
     let msg = `錯誤 ${res.status}`;
     try { const j = await res.json(); msg = j.error?.message || msg; } catch {}
-    if (res.status === 401) msg = 'API Key 或存取碼不正確（' + msg + '）';
+    if (res.status === 401) {
+      if (settings.mode === 'worker') { setTimeout(openSettings, 300); msg = '請輸入存取碼（向老師或作者索取）'; }
+      else msg = 'API Key 不正確（' + msg + '）';
+    }
     throw new Error(msg);
   }
   const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
@@ -570,7 +576,7 @@ function openSettings(){
 }
 $('#saveSet').onclick = () => {
   settings.mode = document.querySelector('input[name=mode]:checked').value;
-  settings.workerUrl = $('#workerUrl').value.trim(); settings.accessCode = $('#accessCode').value.trim();
+  settings.workerUrl = $('#workerUrl').value.trim() || DEFAULT_API; settings.accessCode = $('#accessCode').value.trim();
   settings.apiKey = $('#apiKey').value.trim(); settings.model = $('#model').value.trim() || DEFAULT_MODEL;
   saveSettings(); $('#modal').classList.remove('open'); toast(configured() ? '設定已儲存 ✅' : '還沒填寫連線資訊喔');
 };
