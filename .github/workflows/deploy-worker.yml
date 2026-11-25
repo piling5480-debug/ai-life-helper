@@ -1,4 +1,4 @@
-name: 部署到 Cloudflare（網站 + AI）
+name: 部署到 Cloudflare（選用，repo 設私人時使用）
 
 on:
   push:
@@ -10,33 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HAS_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
-      HAS_CODE: ${{ secrets.ACCESS_CODE != '' }}
     steps:
       - uses: actions/checkout@v4
-      - name: 尚未設定 Cloudflare 金鑰
+      - name: 未設定 Cloudflare，略過（使用 GitHub Pages 即可）
         if: env.HAS_CF != 'true'
-        run: |
-          echo "::error::請到 Settings → Secrets and variables → Actions 加入 CLOUDFLARE_API_TOKEN、CLOUDFLARE_ACCOUNT_ID、ANTHROPIC_API_KEY（ACCESS_CODE 選填）"
-          exit 1
-      - name: 部署（有存取碼）
-        if: env.HAS_CF == 'true' && env.HAS_CODE == 'true'
+        run: echo "未設定 CLOUDFLARE_API_TOKEN，略過 Cloudflare 部署"
+      - name: 部署靜態網站到 Cloudflare
+        if: env.HAS_CF == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          secrets: |
-            ANTHROPIC_API_KEY
-            ACCESS_CODE
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
-      - name: 部署（不需存取碼）
-        if: env.HAS_CF == 'true' && env.HAS_CODE != 'true'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          secrets: |
-            ANTHROPIC_API_KEY
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

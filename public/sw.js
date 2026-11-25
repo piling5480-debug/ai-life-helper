@@ -1,5 +1,5 @@
 // AI 生活小幫手 Service Worker：快取 App 外殼，讓 Android 可安裝、開啟更快
-const CACHE = 'ai-life-helper-v2';
+const CACHE = 'ai-life-helper-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/favicon.png'];
 
 self.addEventListener('install', e => {

@@ -1,7 +1,7 @@
 {
   "name": "AI 生活小幫手｜碧玲のAI生活研究室",
   "short_name": "AI生活小幫手",
-  "description": "拍照翻譯、看懂帳單、LINE 訊息、排行程、設提醒…台灣人日常 10 件事，一個 AI App 搞定。",
+  "description": "不用 API、免費：幫你寫好提示詞，一鍵打開手機裡的 Gemini、ChatGPT、Claude，搞定台灣人日常 10 件事。",
   "lang": "zh-Hant-TW",
   "id": "./",
   "start_url": "./",

@@ -1,12 +1,6 @@
-# 一個 Worker 同時提供：網站（public/）+ AI 代理（/api/chat）
+# 選用：若 repo 設為私人，改由 Cloudflare 免費託管（純靜態網站，不含任何 API）
 name = "ai-life-helper"
-main = "worker/worker.js"
 compatibility_date = "2026-11-01"
 
 [assets]
 directory = "./public"
-binding = "ASSETS"
-
-[vars]
-# 給全班用建議改成 claude-haiku-5-5，比較省錢
-MODEL = "claude-sonnet-5-5"

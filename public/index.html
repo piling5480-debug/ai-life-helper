@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AI生活小幫手">
-<meta name="description" content="拍照翻譯、看懂帳單、LINE 訊息、排行程、設提醒…台灣人日常 10 件事，一個 AI App 搞定。">
+<meta name="description" content="不用另外下載、不用 API：幫你寫好提示詞，一鍵打開手機裡的 Gemini、ChatGPT、Claude，搞定台灣人日常 10 件事。">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -16,27 +16,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#26221f;--bg:#FFF6E0;--paper:#FFFDF7;--yellow:#FFD84D;--pink:#FF6FA0;--muted:#6f655c;--line:#06C755}
+:root{--ink:#26221f;--bg:#FFF6E0;--paper:#FFFDF7;--yellow:#FFD84D;--pink:#FF6FA0;--muted:#6f655c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,-apple-system,sans-serif}
 body{min-height:100vh;background-image:radial-gradient(#efdcae 1.2px,transparent 1.2px);background-size:18px 18px}
 button,input,textarea,select{font-family:inherit;color:inherit}
 .wrap{max-width:780px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(36px + env(safe-area-inset-bottom))}
 
-/* Header */
-header{position:relative;text-align:center;padding:8px 0 4px}
+header{text-align:center;padding:8px 0 4px}
 .brand{display:inline-block;font-size:12px;font-weight:700;background:var(--ink);color:#fff;padding:5px 14px;border-radius:99px;letter-spacing:.08em}
 h1{font-size:clamp(28px,7.6vw,46px);font-weight:900;line-height:1.18;margin:14px 0 4px;letter-spacing:.02em}
 h1 .hl{background:linear-gradient(transparent 58%,var(--yellow) 58%);padding:0 4px}
 h1 .num{color:var(--pink);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;font-size:1.3em;font-style:italic;padding:0 2px}
 .sub{display:inline-block;margin-top:10px;background:#EDE4FF;border:2.5px solid var(--ink);border-radius:99px;padding:8px 18px;font-weight:700;font-size:15px;box-shadow:3px 3px 0 var(--ink)}
-.gear{position:absolute;right:0;top:0;width:44px;height:44px;border-radius:14px;border:2.5px solid var(--ink);background:#fff;box-shadow:3px 3px 0 var(--ink);font-size:20px;cursor:pointer}
-.gear:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.free{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.free span{background:#fff;border:2px solid var(--ink);border-radius:99px;padding:4px 12px;font-size:13px;font-weight:700}
 
-/* Grid */
+.install{display:flex;align-items:center;gap:12px;margin:18px auto 0;max-width:520px;background:#fff;border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--ink);padding:12px 14px;text-align:left}
+.install img{width:48px;height:48px;border-radius:12px;border:2px solid var(--ink)}
+.install div{flex:1;font-size:14px;line-height:1.5}.install b{font-size:15px}
+.install button{border:2.5px solid var(--ink);background:var(--yellow);border-radius:12px;padding:9px 14px;font-weight:900;cursor:pointer;flex:none}
+
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
 @media(max-width:540px){.grid{grid-template-columns:1fr}}
-.card{position:relative;display:flex;gap:12px;align-items:flex-start;text-align:left;padding:16px 14px 16px 16px;border:2.5px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s;min-height:118px;width:100%}
+.card{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:16px 14px 16px 16px;border:2.5px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s;min-height:118px;width:100%}
 .card:hover{transform:translate(-1px,-2px);box-shadow:5px 6px 0 var(--ink)}
 .card:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
 .badge{flex:none;width:38px;height:38px;border-radius:50%;background:var(--yellow);border:2.5px solid var(--ink);display:grid;place-items:center;font-weight:900;font-size:17px}
@@ -49,89 +52,66 @@ h1 .num{color:var(--pink);-webkit-text-stroke:2px var(--ink);paint-order:stroke 
 .slogan span{background:var(--yellow);border:2.5px solid var(--ink);padding:8px 16px;border-radius:14px;display:inline-block;box-shadow:3px 3px 0 var(--ink)}
 .note{text-align:center;font-size:12.5px;color:var(--muted);line-height:1.7}
 
-/* Chat sheet */
+/* Scene sheet */
 .sheet{position:fixed;inset:0;background:var(--paper);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:20}
 .sheet.open{transform:none}
 .topbar{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:2.5px solid var(--ink)}
 .topbar .back{width:40px;height:40px;border-radius:12px;border:2.5px solid var(--ink);background:#fff;font-size:20px;cursor:pointer;flex:none}
 .topbar .t{flex:1;min-width:0;font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.topbar select{border:2.5px solid var(--ink);border-radius:12px;padding:7px 8px;background:#fff;font-weight:700;font-size:14px}
-.msgs{flex:1;overflow-y:auto;padding:16px 14px 8px;max-width:780px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch}
-.msg{display:flex;margin:0 0 14px}
-.msg.u{justify-content:flex-end}
-.bub{max-width:86%;padding:11px 14px;border:2.5px solid var(--ink);border-radius:18px;font-size:15.5px;line-height:1.7;word-break:break-word}
-.msg.u .bub{background:#DDF0FF;border-bottom-right-radius:6px}
-.msg.b .bub{background:#fff;border-bottom-left-radius:6px;box-shadow:3px 3px 0 var(--ink)}
-.bub p{margin:0 0 6px}.bub p:last-child{margin-bottom:0}
-.bub ul,.bub ol{margin:4px 0 8px;padding-left:22px}.bub li{margin:2px 0}
-.bub h4{margin:10px 0 4px;font-size:16px;font-weight:900}
-.bub pre{background:#f6f1e6;border-radius:10px;padding:10px;overflow-x:auto;font-size:13.5px;white-space:pre-wrap}
-.bub code{background:#f6f1e6;padding:1px 5px;border-radius:6px;font-size:.92em}
-.bub hr{border:0;border-top:2px dashed #d9cdb6;margin:10px 0}
-.bub .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-.bub .thumbs img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:2px solid var(--ink)}
-.pdfchip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:4px 8px;font-size:13px;font-weight:700}
-.err{color:#c62828;font-weight:700}
-.typing{display:inline-flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink);opacity:.3;animation:blink 1s infinite}
-.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
-@keyframes blink{50%{opacity:1}}
-.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.act{border:2px solid var(--ink);background:#FFF4CC;border-radius:99px;padding:6px 12px;font-size:13.5px;font-weight:700;cursor:pointer;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:4px}
-.act.line{background:var(--line);color:#fff}
-.act:active{transform:translate(1px,1px)}
-.evs{margin-top:10px;border:2px dashed var(--ink);border-radius:14px;padding:10px 12px;background:#FFFBEA}
-.evs b{display:block;margin-bottom:4px}
-.ev{font-size:14px;padding:3px 0}
-
-.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 14px 4px;max-width:780px;width:100%;margin:0 auto;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:2px solid var(--ink);background:#fff;border-radius:99px;padding:7px 13px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
-.pend{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px;max-width:780px;width:100%;margin:0 auto}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.inner{max-width:640px;margin:0 auto;padding:16px 16px calc(30px + env(safe-area-inset-bottom))}
+.lead{background:#fff;border:2.5px solid var(--ink);border-radius:18px;padding:12px 14px;font-size:15px;line-height:1.65;box-shadow:3px 3px 0 var(--ink)}
+.step{margin-top:20px}
+.step h4{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:16px;font-weight:900}
+.step h4 i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);display:grid;place-items:center;font-size:13px}
+.step h4 small{font-weight:500;color:var(--muted);font-size:13px}
+.pick{display:flex;gap:10px;flex-wrap:wrap}
+.pbtn{border:2.5px solid var(--ink);background:#fff;border-radius:14px;padding:10px 14px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.pbtn:active{transform:translate(2px,2px);box-shadow:none}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 .pi{position:relative}
-.pi img{width:64px;height:64px;object-fit:cover;border-radius:12px;border:2.5px solid var(--ink);display:block}
-.pi .x{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:#fff;font-size:12px;font-weight:900;cursor:pointer;line-height:1}
-.inbar{display:flex;align-items:flex-end;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));max-width:780px;width:100%;margin:0 auto}
-.ib{flex:none;width:44px;height:44px;border-radius:14px;border:2.5px solid var(--ink);background:#fff;font-size:20px;cursor:pointer}
-.ib.rec{background:var(--pink);animation:pulse 1s infinite}
-@keyframes pulse{50%{transform:scale(1.06)}}
-.ib.send{background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
-.ib:disabled{opacity:.45}
-textarea#ta{flex:1;min-width:0;resize:none;border:2.5px solid var(--ink);border-radius:16px;padding:10px 12px;font-size:16px;line-height:1.5;max-height:140px;background:#fff;outline:none}
-textarea#ta:focus{box-shadow:0 0 0 3px #FFD84D88}
-
-/* Settings */
-.modal{position:fixed;inset:0;background:rgba(38,34,31,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
-.modal.open{display:flex}
-.panel{background:var(--paper);border:2.5px solid var(--ink);border-radius:22px;box-shadow:5px 5px 0 var(--ink);padding:20px;width:100%;max-width:440px;max-height:90vh;overflow:auto}
-.panel h2{margin:0 0 12px;font-size:20px;font-weight:900}
-.panel label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
-.panel input[type=text],.panel input[type=password],.panel input[type=url]{width:100%;border:2.5px solid var(--ink);border-radius:12px;padding:9px 11px;font-size:15px;background:#fff}
-.seg{display:flex;gap:8px}
-.seg label{flex:1;margin:0;border:2.5px solid var(--ink);border-radius:12px;padding:9px;text-align:center;cursor:pointer;background:#fff;font-size:14px}
-.seg input{display:none}
-.seg input:checked+span{font-weight:900}
-.seg label:has(input:checked){background:var(--yellow)}
-.hint{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px}
-.row{display:flex;gap:10px;margin-top:18px}
-.btn{flex:1;border:2.5px solid var(--ink);border-radius:14px;padding:11px;font-weight:900;font-size:15px;cursor:pointer;background:#fff;box-shadow:3px 3px 0 var(--ink)}
-.btn.pri{background:var(--yellow)}
-.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+.pi img{width:84px;height:84px;object-fit:cover;border-radius:12px;border:2.5px solid var(--ink);display:block}
+.pi .file{display:flex;align-items:center;height:84px;padding:0 12px;border:2.5px solid var(--ink);border-radius:12px;background:#fff;font-size:13px;font-weight:700;max-width:200px;word-break:break-all}
+.pi .x{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);background:#fff;font-size:12px;font-weight:900;cursor:pointer;line-height:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:2px solid var(--ink);background:#fff;border-radius:99px;padding:6px 12px;font-size:13.5px;font-weight:700;cursor:pointer}
+.chip.on{background:var(--yellow)}
+.tawrap{position:relative}
+textarea{width:100%;resize:vertical;min-height:96px;border:2.5px solid var(--ink);border-radius:16px;padding:12px 52px 12px 12px;font-size:16px;line-height:1.55;background:#fff;outline:none}
+textarea:focus{box-shadow:0 0 0 3px #FFD84D88}
+.mic{position:absolute;right:8px;top:8px;width:38px;height:38px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:18px;cursor:pointer}
+.mic.rec{background:var(--pink);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+select.lang{border:2.5px solid var(--ink);border-radius:12px;padding:8px 10px;background:#fff;font-weight:700;font-size:15px;margin-bottom:10px}
+.ais{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.ai{display:flex;align-items:center;justify-content:center;gap:8px;border:2.5px solid var(--ink);border-radius:16px;padding:13px 10px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-align:center;line-height:1.3}
+.ai:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.ai small{display:block;font-weight:500;font-size:11.5px;opacity:.85}
+.ai.share{grid-column:1/-1;background:var(--yellow);font-size:17px}
+.ai.gemini{background:#E1EEFF}.ai.gpt{background:#DFF5F2}.ai.claude{background:#FFEBD9}.ai.copy{background:#fff}
+.tip{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.65}
+details{margin-top:14px;border:2px dashed #cdbf9f;border-radius:14px;padding:10px 12px;background:#FFFBEA}
+summary{cursor:pointer;font-weight:700;font-size:14px}
+details pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.6;margin:10px 0 0}
+.form{display:grid;gap:10px}
+.form label{font-weight:700;font-size:14px;display:grid;gap:5px}
+.form input,.form select{border:2.5px solid var(--ink);border-radius:12px;padding:10px;font-size:16px;background:#fff;width:100%}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.or{display:flex;align-items:center;gap:10px;margin:22px 0 4px;color:var(--muted);font-size:13px;font-weight:700}
+.or:before,.or:after{content:"";flex:1;border-top:2px dashed #d9cdb6}
+.toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none;max-width:90vw;text-align:center;line-height:1.5}
 .toast.show{opacity:1}
 .hidden{display:none!important}
-.install{display:flex;align-items:center;gap:12px;margin:18px auto 0;max-width:520px;background:#fff;border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--ink);padding:12px 14px;text-align:left}
-.install img{width:48px;height:48px;border-radius:12px;border:2px solid var(--ink)}
-.install div{flex:1;font-size:14px;line-height:1.5}.install b{font-size:15px}
-.install button{border:2.5px solid var(--ink);background:var(--yellow);border-radius:12px;padding:9px 14px;font-weight:900;cursor:pointer;flex:none}
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header>
-    <button class="gear" id="gearBtn" aria-label="設定">⚙️</button>
     <span class="brand">碧玲のAI生活研究室</span>
-    <h1>一支手機搞定<br><span class="hl">台灣人日常</span> <span class="num">10</span> 件事</h1>
-    <div class="sub">點一下情境，拍照、講話、打字都可以 👇</div>
+    <h1>手機裡的 AI<br><span class="hl">台灣人日常</span> <span class="num">10</span> 件事</h1>
+    <div class="sub">幫你寫好提示詞，一鍵打開你的 AI App 👇</div>
+    <div class="free"><span>✅ 免費</span><span>✅ 不用 API Key</span><span>✅ 用你自己的 Gemini／ChatGPT／Claude</span></div>
   </header>
   <div class="install hidden" id="installBar">
     <img src="icons/icon-192.png" alt="">
@@ -139,467 +119,287 @@ textarea#ta:focus{box-shadow:0 0 0 3px #FFD84D88}
     <button id="installBtn">安裝</button>
   </div>
   <main class="grid" id="grid"></main>
-  <div class="slogan"><span>最好用的 App，就是隨手打開就會用的那一個。</span></div>
-  <p class="note">AI 回答僅供參考；路線、班次、帳單金額請以官方資訊為準。<br>可用瀏覽器「加入主畫面」，像 App 一樣開啟。</p>
+  <div class="slogan"><span>最好用的 App，常常是手機裡已經有的那一個。</span></div>
+  <p class="note">本 App 不會上傳你的照片或文字，內容只會交給你自己選的 AI App。<br>AI 回答僅供參考；路線、班次、帳單金額請以官方資訊為準。</p>
 </div>
 
-<!-- Chat -->
 <section class="sheet" id="sheet" aria-hidden="true">
   <div class="topbar">
     <button class="back" id="backBtn" aria-label="返回">←</button>
     <div class="t" id="sceneTitle"></div>
-    <select id="langSel" class="hidden" aria-label="練習語言">
-      <option value="en-US">英文</option>
-      <option value="ja-JP">日文</option>
-      <option value="ko-KR">韓文</option>
-    </select>
   </div>
-  <div class="msgs" id="msgs"></div>
-  <div class="chips" id="chips"></div>
-  <div class="pend" id="pend"></div>
-  <div class="inbar">
-    <button class="ib" id="camBtn" aria-label="拍照">📷</button>
-    <button class="ib" id="fileBtn" aria-label="上傳檔案">📎</button>
-    <textarea id="ta" rows="1" placeholder="輸入訊息…"></textarea>
-    <button class="ib" id="micBtn" aria-label="語音輸入">🎤</button>
-    <button class="ib send" id="sendBtn" aria-label="送出">➤</button>
-  </div>
+  <div class="body"><div class="inner" id="inner"></div></div>
   <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
   <input type="file" id="fileInput" multiple hidden>
 </section>
-
-<!-- Settings -->
-<div class="modal" id="modal">
-  <div class="panel">
-    <h2>⚙️ 連線設定</h2>
-    <label>連線方式</label>
-    <div class="seg">
-      <label><input type="radio" name="mode" value="worker"><span>內建伺服器（建議）</span></label>
-      <label><input type="radio" name="mode" value="direct"><span>自己的 API Key</span></label>
-    </div>
-    <div id="workerBox">
-      <label for="accessCode">存取碼</label>
-      <input type="password" id="accessCode" placeholder="向老師或作者索取">
-      <label for="workerUrl">伺服器網址（一般不用改）</label>
-      <input type="text" id="workerUrl" placeholder="api/chat">
-      <p class="hint">AI 金鑰保管在伺服器端，大家直接使用就好，不需要自己的 API Key。</p>
-    </div>
-    <div id="directBox">
-      <label for="apiKey">Claude API Key</label>
-      <input type="password" id="apiKey" placeholder="sk-ant-...">
-      <label for="model">模型</label>
-      <input type="text" id="model" placeholder="claude-sonnet-5-5">
-      <p class="hint">⚠️ Key 只存在這台裝置的瀏覽器，適合自己測試；要分享給別人請改用 Worker。</p>
-    </div>
-    <div class="row">
-      <button class="btn" id="cancelSet">取消</button>
-      <button class="btn pri" id="saveSet">儲存</button>
-    </div>
-  </div>
-</div>
 <div class="toast" id="toast"></div>
 
 <script>
-const DEFAULT_MODEL = 'claude-sonnet-5-5';
-
-const CAL_RULE = '如果內容包含要放進行事曆的行程或提醒：先用條列清楚說明安排，最後另外附上一個 ```json 程式碼區塊，格式為 {"events":[{"title":"標題","start":"YYYY-MM-DDTHH:mm","end":"YYYY-MM-DDTHH:mm","rrule":"","description":"備註"}]}。時間一律是台灣時間；重複事件的 rrule 用 iCalendar 格式（例如每月 25 號：FREQ=MONTHLY;BYMONTHDAY=25），不重複就給空字串。「明天」「下週一」等請依現在時間推算成實際日期；使用者沒說時間的提醒預設早上 9:00，長度 15 分鐘。';
+/* ================= 情境設定 ================= */
+const HEAD = '請用台灣繁體中文和台灣慣用語回答，口語、簡潔、多用條列，手機上一眼看得懂。';
 
 const SCENES = [
-  { title:'拍照翻譯', tag:'開鏡頭', icon:'🍜', color:'#FFE3EC',
-    example:'這張菜單翻成中文，推薦兩道',
-    chips:['這張菜單翻成中文，推薦兩道','這個說明書在寫什麼？','幫我翻譯這個告示牌'],
-    welcome:'拍一下菜單、招牌或說明書，我幫你翻成中文 📸',
-    accept:'image/*', camera:true,
-    sys:'你負責把照片中的外文（日文、韓文、英文、泰文等）翻成台灣繁體中文。菜單要列出「原文 → 中文 → 簡短說明」，價格附上約略新台幣換算（註明為估算匯率），最後依使用者需求推薦菜色並說明理由。看不清楚的字要老實說。' },
-  { title:'看懂帳單', tag:'拍帳單', icon:'⚡', color:'#DFF5F2',
-    example:'這期電費為什麼比上期貴？',
-    chips:['這期電費為什麼比上期貴？','幫我看這張電信帳單有沒有多收','這張繳費單的期限跟金額是多少？'],
-    welcome:'拍台電電費單、水費單或電信帳單，我幫你看懂每一項 💡',
-    accept:'image/*,application/pdf', camera:true,
-    sys:'你擅長解讀台灣的各種帳單（台電電費單、自來水、瓦斯、電信、信用卡帳單）。先抓出：應繳金額、繳費期限、計費期間、用量。比較差異時說明原因（例如台電累進費率、夏月 6–9 月電價較高、計費天數不同）。最後給 2–3 個實用省錢建議。照片看不到的數字不要編造。' },
-  { title:'寫訊息', tag:'LINE 直接傳', icon:'💬', color:'#E1EEFF',
-    example:'幫我寫一則有禮貌的請假訊息給主管',
-    chips:['幫我寫一則有禮貌的請假訊息給主管','幫我回覆家族群組，婉拒這週聚餐','寫一則生日祝福給客戶'],
-    welcome:'想傳什麼訊息？說給我聽，寫好可以一鍵用 LINE 傳出去 ✉️',
-    accept:'image/*', camera:false, line:true,
-    sys:'你幫使用者寫要用 LINE 傳出的訊息。只輸出可以直接複製傳送的訊息本文，不要加任何前言、標題或說明。語氣符合台灣職場／家庭習慣，自然、有禮貌、不要太長；可適度加 1–2 個表情符號（給主管或客戶就少用）。使用者若要修改，就直接給修改後的完整版本。' },
-  { title:'排行程', tag:'加入行事曆', icon:'📅', color:'#FFF4CC',
-    example:'幫我把明天的事情排進行事曆',
-    chips:['明天 9 點開會、中午跟客戶吃飯、下午 3 點半接小孩','下週六早上帶爸媽去回診，幫我排好','這週五下班後去健身 1 小時'],
-    welcome:'跟我說你要做哪些事，我幫你排好時間，還能一鍵加入行事曆 🗓️',
-    accept:'image/*', camera:false, cal:true,
-    sys:'你是行程秘書，幫使用者把待辦排成合理的時間表，考慮台灣交通與用餐時間，事件之間保留緩衝。' + CAL_RULE },
-  { title:'讀郵件', tag:'貼上郵件', icon:'📧', color:'#E6F7E1',
-    example:'幫我抓出這封信的報價跟期限，並擬回信',
-    chips:['幫我抓出這封信的報價跟期限，並擬回信','這封英文信在說什麼？用中文講重點','幫我寫一封禮貌的催款信'],
-    welcome:'把郵件內容貼上來（或截圖），我幫你抓重點、擬回信 📬',
-    accept:'image/*,application/pdf', camera:false,
-    sys:'你幫使用者處理電子郵件。先用條列抓出重點：寄件人要什麼、金額／報價、期限、需要我做的事。需要回信時，附上一封可直接使用的回信草稿（語言與原信相同，商務語氣）。' },
-  { title:'讀文件', tag:'上傳 PDF', icon:'📄', color:'#EFE6FF',
-    example:'用三句話講重點',
-    chips:['用三句話講重點','這份合約有哪些要注意的地方？','整理成會議可以用的條列重點'],
-    welcome:'上傳 PDF 或拍文件，我幫你濃縮成重點 📑',
-    accept:'application/pdf,image/*', camera:true,
-    sys:'你幫使用者快速讀懂文件（PDF、公文、合約、說明書、學校通知）。依使用者要求的長度整理重點；合約類要特別標出金額、期限、違約或自動續約等風險條款。提醒這不是法律意見。' },
-  { title:'規劃路線', tag:'捷運出遊', icon:'🚇', color:'#FFEBD9',
-    example:'週末帶小孩搭台北捷運出去，排半天行程',
-    chips:['週末帶小孩搭台北捷運出去，排半天行程','高雄輕軌沿線一日遊怎麼走？','下雨天台中室內親子景點路線'],
-    welcome:'想去哪、跟誰去、有多少時間？我幫你排捷運／公車／YouBike 路線 🗺️',
-    accept:'image/*', camera:false, cal:true,
-    sys:'你熟悉台灣的大眾運輸（台北／新北／桃園／台中／高雄捷運、輕軌、台鐵、公車、YouBike）與親子景點。依出發地、人數、時間排出順暢的路線：每站寫出「交通方式、約略時間、在那裡做什麼」，考慮小孩體力、午餐、廁所。提醒班次與營業時間請以官方 App（如台北捷運 Go、Google 地圖）為準。' + CAL_RULE },
-  { title:'練語言', tag:'開語音', icon:'🗣️', color:'#FFE0F0',
-    example:'陪我練 10 分鐘英文對話',
-    chips:['陪我練英文，情境是在咖啡廳點餐','模擬日本旅遊問路','練面試自我介紹'],
-    welcome:'選好右上角的語言，按 🎤 直接開口講，我會陪你對話並唸給你聽 🎧',
-    accept:null, camera:false, tts:true, lang:true,
-    sys:'' },
-  { title:'認東西', tag:'開鏡頭', icon:'🌿', color:'#E8E4FF',
-    example:'這是什麼植物？要怎麼照顧？',
-    chips:['這是什麼植物？要怎麼照顧？','這是什麼蟲？會咬人嗎？','這個零件叫什麼？哪裡買？'],
-    welcome:'拍下植物、昆蟲或不認識的東西，我告訴你它是什麼 🔍',
-    accept:'image/*', camera:true,
-    sys:'你幫使用者辨識照片中的植物、昆蟲、食物或物品。先給最可能的名稱（附可信度：高／中／低），再提供實用資訊。植物要給適合台灣氣候（潮濕、夏季炎熱、颱風）的照顧方式：光照、澆水頻率、常見問題。可能有毒或危險的東西要特別提醒。不確定就說不確定。' },
-  { title:'設提醒', tag:'每月自動', icon:'⏰', color:'#DDF0FF',
-    example:'每個月 25 號提醒我繳電費',
-    chips:['每個月 25 號提醒我繳電費','每週三晚上 8 點提醒我倒資源回收','5 月提醒我報綜所稅'],
-    welcome:'要我提醒你什麼？說一聲，我幫你做成手機行事曆提醒 🔔',
-    accept:null, camera:false, cal:true,
-    sys:'你幫使用者設定提醒。用一兩句話確認提醒內容與時間，注意台灣常見的期限（例如綜所稅 5 月申報、牌照稅 4 月、燃料費 7 月、台電電費約兩個月一期）。' + CAL_RULE },
+  { title:'拍照翻譯', tag:'開鏡頭', icon:'🍜', color:'#FFE3EC', media:'photo',
+    lead:'出國看不懂菜單、招牌、說明書？拍下來，交給 AI 翻成中文。',
+    chips:['這張菜單翻成中文，推薦兩道','這個告示牌在寫什麼？','這個說明書怎麼用？'],
+    rule:'我會附上一張外文照片。請把照片中的文字翻成繁體中文，菜單請列出「原文 → 中文 → 一句說明」，價格附上約略新台幣換算（註明是估算匯率），看不清楚的字請直接說。' },
+  { title:'看懂帳單', tag:'拍帳單', icon:'⚡', color:'#DFF5F2', media:'photo',
+    lead:'台電電費單、水費、電信帳單看不懂？拍下來問 AI。',
+    chips:['這期電費為什麼比上期貴？','幫我看這張電信帳單有沒有多收','這張繳費單的期限和金額是多少？'],
+    rule:'我會附上一張台灣的帳單照片（台電、自來水、瓦斯、電信或信用卡）。請先抓出：應繳金額、繳費期限、計費期間、用量；比較差異時說明可能原因（例如台電累進費率、夏月 6–9 月電價較高、計費天數不同），最後給 2–3 個實用省錢建議。照片看不到的數字不要編造。' },
+  { title:'寫訊息', tag:'LINE 用', icon:'💬', color:'#E1EEFF', media:null,
+    lead:'不知道怎麼開口？說出狀況，AI 幫你寫好可以直接貼到 LINE 的訊息。',
+    chips:['幫我寫一則有禮貌的請假訊息給主管，明天身體不舒服','幫我婉拒這週末的家族聚餐','幫我寫生日祝福給客戶'],
+    rule:'請幫我寫一則要用 LINE 傳出的訊息，語氣符合台灣職場／家庭習慣，自然有禮貌、不要太長，可適度加 1–2 個表情符號（給主管或客戶就少用）。請直接給我 2 個版本（正式一點、輕鬆一點），不用多餘說明。' },
+  { title:'排行程', tag:'排進行事曆', icon:'📅', color:'#FFF4CC', media:null, cal:true,
+    lead:'把要做的事說一說，請 AI 幫你排出時間表。單一事件也可以在下面直接加入行事曆。',
+    chips:['明天 9 點開會、中午跟客戶吃飯、下午 3 點半接小孩','下週六早上帶爸媽去回診','這週五下班後去健身'],
+    rule:'請當我的行程秘書，把下面的事情排成合理的時間表（考慮台灣交通與用餐時間，事件之間留緩衝），用「時間｜事項｜備註」列出。如果你可以直接幫我建立 Google 日曆活動，請幫我加入。' },
+  { title:'讀郵件', tag:'抓重點', icon:'📧', color:'#E6F7E1', media:'photo',
+    lead:'長長的郵件不想看？截圖或貼上內容，AI 幫你抓重點、擬回信。',
+    chips:['幫我抓出報價金額和期限，並擬一封回信','這封英文信在說什麼？用中文講重點','幫我找上星期那封有報價的郵件'],
+    rule:'請幫我處理電子郵件：先條列重點（對方要什麼、金額或報價、期限、我需要做的事）；如果需要回信，附上一封可直接使用的回信草稿（語言與原信相同、商務語氣）。如果你可以讀取我的 Gmail，也可以直接幫我搜尋。' },
+  { title:'讀文件', tag:'PDF 重點', icon:'📄', color:'#EFE6FF', media:'file',
+    lead:'合約、公文、學校通知太長？上傳 PDF 或拍下來，AI 三句話講重點。',
+    chips:['用三句話講重點','這份合約有哪些要注意的地方？','整理成會議用的條列重點'],
+    rule:'我會附上一份文件。請依我要求的長度整理重點；如果是合約，請特別標出金額、期限、違約、自動續約等風險條款，並提醒這不是法律意見。' },
+  { title:'規劃路線', tag:'捷運出遊', icon:'🚇', color:'#FFEBD9', media:null,
+    lead:'跟誰去、去哪裡、有多少時間？讓 AI 幫你排捷運／公車／YouBike 路線。',
+    chips:['週末帶小孩從台北車站出發，搭捷運玩半天','高雄輕軌沿線一日遊','下雨天台中室內親子景點路線'],
+    rule:'請依我的需求排出順暢的出遊路線，使用台灣大眾運輸（捷運、輕軌、台鐵、公車、YouBike）。每一站寫出「交通方式、約略時間、在那裡做什麼」，考慮小孩體力、午餐和廁所。請提醒班次與營業時間以官方 App 或 Google 地圖為準。' },
+  { title:'練語言', tag:'開語音', icon:'🗣️', color:'#FFE0F0', media:null, lang:true,
+    lead:'選好語言和情境，打開 AI App 後用語音對話（Gemini Live、ChatGPT 語音模式都可以）。',
+    chips:['在咖啡廳點餐','在日本問路','工作面試自我介紹'],
+    rule:'' },
+  { title:'認東西', tag:'開鏡頭', icon:'🌿', color:'#E8E4FF', media:'photo',
+    lead:'路邊的植物、家裡的蟲、不認識的零件？拍下來問 AI。',
+    chips:['這是什麼植物？要怎麼照顧？','這是什麼蟲？會咬人嗎？','這個零件叫什麼？哪裡買得到？'],
+    rule:'我會附上一張照片。請辨識照片中的植物、昆蟲或物品，先給最可能的名稱和可信度（高／中／低），再給實用資訊；植物請給適合台灣氣候（潮濕、夏季炎熱、颱風）的照顧方式：光照、澆水頻率、常見問題。可能有毒或危險請特別提醒。' },
+  { title:'設提醒', tag:'每月自動', icon:'⏰', color:'#DDF0FF', media:null, cal:true, calFirst:true,
+    lead:'每月繳費、倒垃圾、報稅…直接在下面填好，一鍵加入手機行事曆，完全不用 AI。',
+    chips:['每個月 25 號提醒我繳電費','每週三晚上 8 點倒資源回收','5 月提醒我報綜所稅'],
+    rule:'請幫我設定這個提醒。如果你可以直接建立 Google 日曆活動或提醒，請直接幫我建立；如果不行，請告訴我在手機上最快的設定方式。' },
 ];
-
 const LANGS = {'en-US':'英文','ja-JP':'日文','ko-KR':'韓文'};
 
+/* ================= 工具 ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let settings = loadSettings();
-let scene = null, history = [], pending = [], busy = false;
+let tt; function toast(m, ms=2600){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),ms); }
+const isAndroid = /Android/i.test(navigator.userAgent);
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-/* ---------- storage ---------- */
-const DEFAULT_API = 'api/chat'; // 同一個網站內建的 AI 代理，同學打開就能用
-function loadSettings(){
-  const d = {mode:'worker',workerUrl:DEFAULT_API,accessCode:'',apiKey:'',model:DEFAULT_MODEL};
-  let s; try { s = Object.assign(d, JSON.parse(localStorage.getItem('aiHelperSettings')||'{}')); } catch { s = d; }
-  if (!s.workerUrl) s.workerUrl = DEFAULT_API;
-  return s;
-}
-function saveSettings(){ try { localStorage.setItem('aiHelperSettings', JSON.stringify(settings)); } catch {} }
-const configured = () => settings.mode === 'direct' ? !!settings.apiKey : !!settings.workerUrl;
-
-/* ---------- home grid ---------- */
+/* ================= 首頁 ================= */
 $('#grid').innerHTML = SCENES.map((s,i)=>`
   <button class="card" style="background:${s.color}" data-i="${i}">
     <span class="badge">${i+1}</span>
-    <span class="txt"><h3>${s.title}<small>｜${s.tag}</small></h3><p>「${s.example}」</p></span>
+    <span class="txt"><h3>${s.title}<small>｜${s.tag}</small></h3><p>「${s.chips[0]}」</p></span>
     <span class="ico">${s.icon}</span>
   </button>`).join('');
-$('#grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openScene(SCENES[+c.dataset.i]); });
+$('#grid').addEventListener('click', e => { const c=e.target.closest('.card'); if(c) openScene(+c.dataset.i); });
 
-/* ---------- scene ---------- */
-function openScene(s){
-  scene = s; history = []; pending = []; renderPending();
-  $('#sceneTitle').textContent = `${s.icon} ${s.title}`;
-  $('#langSel').classList.toggle('hidden', !s.lang);
-  $('#camBtn').classList.toggle('hidden', !s.camera);
-  $('#fileBtn').classList.toggle('hidden', !s.accept);
-  $('#fileInput').accept = s.accept || '';
-  $('#msgs').innerHTML = '';
-  addBot(s.welcome);
-  $('#chips').innerHTML = s.chips.map(c=>`<button class="chip">${esc(c)}</button>`).join('');
-  $('#ta').value = ''; $('#ta').placeholder = `例如：${s.example}`;
+/* ================= 情境頁 ================= */
+let scene=null, files=[];
+
+function openScene(i){
+  scene = SCENES[i]; files = [];
+  $('#sceneTitle').textContent = `${scene.icon} ${scene.title}`;
+  let n = 1, h = `<div class="lead">${esc(scene.lead)}</div>`;
+
+  if (scene.calFirst) h += calForm() + `<div class="or">或請 AI 幫忙</div>`;
+
+  if (scene.media) {
+    h += `<div class="step"><h4><i>${n++}</i>${scene.media==='file'?'上傳 PDF 或拍文件':'拍照或選照片'}<small>（選填）</small></h4>
+      <div class="pick">
+        <button class="pbtn" id="camBtn">📷 拍照</button>
+        <button class="pbtn" id="fileBtn">🖼️ ${scene.media==='file'?'選 PDF／圖片':'從相簿選'}</button>
+      </div><div class="thumbs" id="thumbs"></div></div>`;
+  }
+
+  h += `<div class="step"><h4><i>${n++}</i>${scene.lang?'選語言和情境':'你想問什麼？'}<small>點選或自己打、用說的</small></h4>
+    ${scene.lang ? `<select class="lang" id="lang">${Object.entries(LANGS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>` : ''}
+    <div class="chips" id="chips">${scene.chips.map((c,j)=>`<button class="chip${j===0?' on':''}">${esc(c)}</button>`).join('')}</div>
+    <div class="tawrap"><textarea id="ta" rows="3">${esc(scene.chips[0])}</textarea><button class="mic hidden" id="micBtn" aria-label="語音輸入">🎤</button></div></div>`;
+
+  h += `<div class="step"><h4><i>${n++}</i>送到你的 AI App</h4>
+    <div class="ais">
+      ${navigator.share ? `<button class="ai share" data-go="share">📤 分享到 AI App<small>${scene.media?'照片和提示詞一起傳，選 Gemini／ChatGPT／Claude':'選 Gemini／ChatGPT／Claude'}</small></button>` : ''}
+      <button class="ai gemini" data-go="gemini">✨ Gemini<small>自動複製，打開後貼上</small></button>
+      <button class="ai gpt" data-go="chatgpt">💬 ChatGPT<small>自動帶入問題</small></button>
+      <button class="ai claude" data-go="claude">🧡 Claude<small>自動帶入問題</small></button>
+      <button class="ai copy" data-go="copy">📋 只複製<small>貼到任何 AI</small></button>
+    </div>
+    <p class="tip" id="tip"></p>
+    <details><summary>看看完整提示詞</summary><pre id="preview"></pre></details></div>`;
+
+  if (scene.cal && !scene.calFirst) h += `<div class="or">單一事件直接加入行事曆</div>` + calForm();
+
+  $('#inner').innerHTML = h;
+  bindScene();
   $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden','false');
-  history_push();
+  $('.body').scrollTop = 0;
+  try { history.pushState({scene:i},''); } catch {}
 }
-function closeScene(){
-  $('#sheet').classList.remove('open'); $('#sheet').setAttribute('aria-hidden','true');
-  try { speechSynthesis.cancel(); } catch {}
-  stopRec();
-}
-function history_push(){ try { window.history.pushState({chat:1},''); } catch {} }
+function closeScene(){ $('#sheet').classList.remove('open'); $('#sheet').setAttribute('aria-hidden','true'); stopRec(); }
 window.addEventListener('popstate', () => { if ($('#sheet').classList.contains('open')) closeScene(); });
-$('#backBtn').onclick = () => { try { window.history.back(); } catch { closeScene(); } setTimeout(()=>{ if($('#sheet').classList.contains('open')) closeScene(); },120); };
-$('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; $('#ta').value = c.textContent; autosize(); $('#ta').focus(); });
+$('#backBtn').onclick = () => { if (history.state && history.state.scene !== undefined) history.back(); else closeScene(); };
 
-/* ---------- system prompt ---------- */
-function nowTW(){
-  const d = new Date(Date.now() + 8*3600e3);
-  const wk = ['日','一','二','三','四','五','六'][d.getUTCDay()];
-  return d.toISOString().slice(0,16).replace('T',' ') + `（星期${wk}）`;
+function bindScene(){
+  $('#chips').onclick = e => { const c=e.target.closest('.chip'); if(!c) return;
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on')); c.classList.add('on');
+    $('#ta').value = c.textContent; refresh(); };
+  $('#ta').oninput = refresh;
+  if ($('#lang')) $('#lang').onchange = refresh;
+  if ($('#camBtn')) { $('#camBtn').onclick = () => $('#camInput').click(); $('#fileBtn').onclick = () => { $('#fileInput').accept = scene.media==='file' ? 'application/pdf,image/*' : 'image/*'; $('#fileInput').click(); }; }
+  document.querySelectorAll('.ai').forEach(b => b.onclick = () => go(b.dataset.go));
+  if (SR) $('#micBtn').classList.remove('hidden');
+  $('#micBtn').onclick = () => rec ? stopRec() : startRec();
+  if ($('#calForm')) bindCal();
+  refresh();
 }
-function systemPrompt(){
-  let sys = `你是「AI 生活小幫手」，服務在台灣生活的使用者。一律使用台灣繁體中文與台灣慣用語（例如：訊息、行事曆、捷運、悠遊卡、統一發票）。回答簡潔、口語、好讀，多用條列，手機上一眼看得懂。現在時間：${nowTW()}，時區 Asia/Taipei。\n\n`;
+
+/* ================= 提示詞 ================= */
+function buildPrompt(){
+  const need = $('#ta').value.trim() || scene.chips[0];
+  const now = new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei',dateStyle:'full',timeStyle:'short'});
   if (scene.lang) {
-    const L = LANGS[$('#langSel').value];
-    sys += `你是親切的${L}會話陪練老師。依使用者指定的情境進行角色扮演對話，一次只說 1–3 句${L}，難度配合使用者程度。每次回覆格式固定：先寫你的${L}台詞；接著一行只有 ---；下面用繁體中文給：①台詞的中文意思 ②若使用者剛剛的${L}有錯，溫和指出並給更自然的說法 ③一個提示：使用者下一句可以怎麼回。使用者用中文講也沒關係，幫他翻成${L}再繼續對話。`;
-  } else sys += scene.sys;
-  return sys;
+    const L = LANGS[$('#lang').value];
+    return `請當我的${L}會話陪練老師，情境是：「${need}」。\n請你先開場，一次只說 1–3 句${L}，難度配合我的程度，然後等我回答。每次回覆請附上：①這句的中文意思 ②如果我剛剛的${L}有錯，溫和指出並給更自然的說法 ③提示我下一句可以怎麼回。我用中文回答也可以，請幫我翻成${L}再繼續。對話大約 10 分鐘，結束時幫我整理今天學到的 5 個實用句子。`;
+  }
+  let p = `${HEAD}\n${scene.rule}\n\n我的需求：${need}`;
+  if (scene.cal || scene.title==='規劃路線') p += `\n（現在時間：${now}，台灣）`;
+  if (scene.media && files.length) p += `\n\n（照片／檔案已附上）`;
+  else if (scene.media) p += `\n\n（我會另外附上照片或檔案）`;
+  return p;
+}
+function refresh(){
+  $('#preview').textContent = buildPrompt();
+  let tip = '';
+  if (scene.media && files.length) tip = navigator.share ? '有照片時請用「📤 分享到 AI App」，照片和提示詞會一起送過去。' : '點 AI App 後，提示詞已複製；在 App 裡按「＋」加入照片，再貼上提示詞。';
+  else if (scene.lang) tip = '打開 AI App 後貼上提示詞送出，再切換到語音模式（Gemini Live 或 ChatGPT 語音）就能用說的練習。';
+  else tip = 'ChatGPT、Claude 會自動帶入問題；Gemini 請在輸入框長按「貼上」。';
+  $('#tip').textContent = tip;
 }
 
-/* ---------- attachments ---------- */
-$('#camBtn').onclick = () => $('#camInput').click();
-$('#fileBtn').onclick = () => $('#fileInput').click();
+/* ================= 送到 AI App ================= */
+async function copy(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { const t=document.createElement('textarea'); t.value=text; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch{} t.remove(); return ok; }
+}
+function openUrl(url){ const w = window.open(url,'_blank','noopener'); if (!w) location.href = url; }
+
+async function go(target){
+  const prompt = buildPrompt();
+  if (target === 'share') {
+    const data = { text: prompt };
+    const shareFiles = files.map(f=>f.file);
+    if (shareFiles.length && navigator.canShare && navigator.canShare({files:shareFiles})) data.files = shareFiles;
+    else if (shareFiles.length) toast('這台手機不支援分享檔案，請在 AI App 裡自行加入照片');
+    await copy(prompt); // 部分 App 只收照片不收文字，先複製當備用
+    try { await navigator.share(data); } catch(e){ if (e.name!=='AbortError') toast('分享失敗，提示詞已複製，請直接貼到 AI App'); }
+    return;
+  }
+  const ok = await copy(prompt);
+  if (target === 'copy') { toast(ok ? '已複製！貼到任何 AI App 就能用' : '複製失敗，請在下方「完整提示詞」長按複製'); return; }
+  const q = encodeURIComponent(prompt);
+  const urls = {
+    gemini:  'https://gemini.google.com/app',
+    chatgpt: 'https://chatgpt.com/?q=' + q,
+    claude:  'https://claude.ai/new?q=' + q,
+  };
+  toast(files.length ? '提示詞已複製，請在 App 裡加入照片後貼上' : (target==='gemini' ? '已複製！打開 Gemini 後長按輸入框貼上' : '已複製，正在打開…'), 3500);
+  setTimeout(() => openUrl(urls[target]), 350);
+}
+
+/* ================= 照片／檔案 ================= */
 $('#camInput').onchange = e => { addFiles(e.target.files); e.target.value=''; };
 $('#fileInput').onchange = e => { addFiles(e.target.files); e.target.value=''; };
-
-function readB64(file){ return new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(String(r.result).split(',')[1]); r.onerror=()=>no(new Error('檔案讀取失敗')); r.readAsDataURL(file); }); }
-function compress(file){
-  return new Promise((ok,no)=>{
-    const img = new Image(), u = URL.createObjectURL(file);
-    img.onload = () => {
-      const M = 1600, r = Math.min(1, M/Math.max(img.width,img.height));
-      const w = Math.round(img.width*r), h = Math.round(img.height*r);
-      const c = document.createElement('canvas'); c.width=w; c.height=h;
-      const ctx = c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
-      const url = c.toDataURL('image/jpeg', .85); URL.revokeObjectURL(u);
-      ok({url, data:url.split(',')[1]});
-    };
-    img.onerror = () => no(new Error('這張圖片無法讀取'));
-    img.src = u;
-  });
-}
-async function addFiles(files){
-  for (const f of files) {
-    try {
-      if (f.type === 'application/pdf') {
-        if (f.size > 20e6) { toast('PDF 太大了（上限約 20MB）'); continue; }
-        pending.push({kind:'pdf', name:f.name, block:{type:'document', source:{type:'base64', media_type:'application/pdf', data:await readB64(f)}}});
-      } else if (f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name)) {
-        const {url,data} = await compress(f);
-        pending.push({kind:'img', url, block:{type:'image', source:{type:'base64', media_type:'image/jpeg', data}}});
-      } else toast('只支援圖片或 PDF 喔');
-    } catch(err){ toast(err.message); }
+function addFiles(list){
+  for (const f of list) {
+    if (!(f.type.startsWith('image/') || f.type==='application/pdf')) { toast('只支援圖片或 PDF'); continue; }
+    files.push({ file:f, url: f.type.startsWith('image/') ? URL.createObjectURL(f) : null });
   }
-  renderPending();
+  renderThumbs(); refresh();
 }
-function renderPending(){
-  $('#pend').innerHTML = pending.map((p,i)=> p.kind==='img'
-    ? `<div class="pi"><img src="${p.url}" alt=""><button class="x" data-i="${i}">✕</button></div>`
-    : `<div class="pi"><span class="pdfchip">📄 ${esc(p.name)}</span><button class="x" data-i="${i}">✕</button></div>`).join('');
-}
-$('#pend').addEventListener('click', e => { const x = e.target.closest('.x'); if (!x) return; pending.splice(+x.dataset.i,1); renderPending(); });
-
-/* ---------- markdown (light) ---------- */
-function inline(s){ return s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>'); }
-function md(src){
-  const blocks = [];
-  let h = esc(src).replace(/```\w*\n?([\s\S]*?)```/g, (m,c)=>{ blocks.push(c); return `\u0000${blocks.length-1}\u0000`; });
-  let out = '', list = null;
-  const close = () => { if (list) { out += `</${list}>`; list = null; } };
-  for (const ln of h.split('\n')) {
-    let m;
-    if ((m = ln.match(/^\s*[-*•]\s+(.*)/))) { if (list!=='ul'){ close(); out+='<ul>'; list='ul'; } out += `<li>${inline(m[1])}</li>`; continue; }
-    if ((m = ln.match(/^\s*\d+[.)、]\s+(.*)/))) { if (list!=='ol'){ close(); out+='<ol>'; list='ol'; } out += `<li>${inline(m[1])}</li>`; continue; }
-    close();
-    if ((m = ln.match(/^\u0000(\d+)\u0000$/))) out += `<pre>${blocks[+m[1]]}</pre>`;
-    else if ((m = ln.match(/^#{1,4}\s+(.*)/))) out += `<h4>${inline(m[1])}</h4>`;
-    else if (/^\s*(---|___|\*\*\*)\s*$/.test(ln)) out += '<hr>';
-    else if (ln.trim()) out += `<p>${inline(ln.replace(/\u0000(\d+)\u0000/g,(x,i)=>'<code>'+blocks[+i]+'</code>'))}</p>`;
-  }
-  close(); return out;
-}
-const stripJson = t => t.replace(/```json[\s\S]*?(```|$)/g,'').trim();
-
-/* ---------- bubbles ---------- */
-function scrollEnd(){ const m=$('#msgs'); m.scrollTop = m.scrollHeight; }
-function addUser(text, atts){
-  const thumbs = atts.filter(a=>a.kind==='img').map(a=>`<img src="${a.url}" alt="">`).join('');
-  const pdfs = atts.filter(a=>a.kind==='pdf').map(a=>`<span class="pdfchip">📄 ${esc(a.name)}</span>`).join(' ');
-  const el = document.createElement('div'); el.className='msg u';
-  el.innerHTML = `<div class="bub">${thumbs?`<div class="thumbs">${thumbs}</div>`:''}${pdfs?`<div class="thumbs">${pdfs}</div>`:''}${text?md(text):''}</div>`;
-  $('#msgs').appendChild(el); scrollEnd();
-}
-function addBot(text){
-  const el = document.createElement('div'); el.className='msg b';
-  el.innerHTML = `<div class="bub"><div class="body">${text===null?'<span class="typing"><i></i><i></i><i></i></span>':md(text)}</div></div>`;
-  $('#msgs').appendChild(el); scrollEnd();
-  return el.querySelector('.bub');
+function renderThumbs(){
+  $('#thumbs').innerHTML = files.map((f,i)=>`<div class="pi">${f.url?`<img src="${f.url}" alt="">`:`<span class="file">📄 ${esc(f.file.name)}</span>`}<button class="x" data-i="${i}">✕</button></div>`).join('');
+  $('#thumbs').onclick = e => { const x=e.target.closest('.x'); if(!x) return; const [r]=files.splice(+x.dataset.i,1); if(r.url) URL.revokeObjectURL(r.url); renderThumbs(); refresh(); };
 }
 
-/* ---------- send ---------- */
-$('#sendBtn').onclick = send;
-$('#ta').addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey && !e.isComposing && e.keyCode!==229 && matchMedia('(hover:hover)').matches) { e.preventDefault(); send(); } });
-$('#ta').addEventListener('input', autosize);
-function autosize(){ const t=$('#ta'); t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,140)+'px'; }
-
-async function send(){
-  if (busy) return;
-  stopRec();
-  let text = $('#ta').value.trim();
-  if (!text && !pending.length) { $('#ta').focus(); return; }
-  if (!configured()) { openSettings(); toast('請先完成連線設定'); return; }
-  if (!text) text = scene.example;
-  const atts = pending; pending = []; renderPending();
-  const content = [...atts.map(a=>a.block), {type:'text', text}];
-  history.push({role:'user', content});
-  addUser($('#ta').value.trim(), atts);
-  $('#ta').value=''; autosize();
-  busy = true; $('#sendBtn').disabled = true;
-  const bub = addBot(null), body = bub.querySelector('.body');
-  let full = '';
-  try {
-    await callAPI(systemPrompt(), history, t => { full += t; body.innerHTML = md(stripJson(full)) || '<span class="typing"><i></i><i></i><i></i></span>'; scrollEnd(); });
-    if (!full.trim()) full = '（沒有收到回應，請再試一次）';
-    history.push({role:'assistant', content: full});
-    finalize(bub, full);
-  } catch(err){
-    history.pop();
-    body.innerHTML = `<p class="err">⚠️ ${esc(err.message || '連線失敗')}</p>`;
-  } finally { busy = false; $('#sendBtn').disabled = false; scrollEnd(); }
-}
-
-async function callAPI(system, messages, onText){
-  const s = settings; let res;
-  const base = {system, messages, max_tokens: 2000};
-  try {
-    if (s.mode === 'direct') {
-      res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
-        headers:{'content-type':'application/json','x-api-key':s.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body: JSON.stringify({...base, model: s.model || DEFAULT_MODEL, stream:true}) });
-    } else {
-      res = await fetch(s.workerUrl, { method:'POST', headers:{'content-type':'application/json','x-access-code':s.accessCode||''}, body: JSON.stringify(base) });
-    }
-  } catch { throw new Error('連不上伺服器，請檢查網路或 Worker 網址'); }
-  if (!res.ok) {
-    let msg = `錯誤 ${res.status}`;
-    try { const j = await res.json(); msg = j.error?.message || msg; } catch {}
-    if (res.status === 401) {
-      if (settings.mode === 'worker') { setTimeout(openSettings, 300); msg = '請輸入存取碼（向老師或作者索取）'; }
-      else msg = 'API Key 不正確（' + msg + '）';
-    }
-    throw new Error(msg);
-  }
-  const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
-  for (;;) {
-    const {done, value} = await reader.read(); if (done) break;
-    buf += dec.decode(value, {stream:true});
-    const lines = buf.split('\n'); buf = lines.pop();
-    for (const line of lines) {
-      if (!line.startsWith('data:')) continue;
-      const d = line.slice(5).trim(); if (!d) continue;
-      let j; try { j = JSON.parse(d); } catch { continue; }
-      if (j.type === 'content_block_delta' && j.delta?.type === 'text_delta') onText(j.delta.text);
-      else if (j.type === 'error') throw new Error(j.error?.message || '伺服器錯誤');
-    }
-  }
-}
-
-/* ---------- after reply: actions ---------- */
-function finalize(bub, full){
-  const shown = stripJson(full);
-  const acts = document.createElement('div'); acts.className = 'acts';
-  const btn = (label, fn, cls='') => { const b=document.createElement('button'); b.className='act '+cls; b.innerHTML=label; b.onclick=fn; acts.appendChild(b); return b; };
-
-  btn('📋 複製', async () => { try { await navigator.clipboard.writeText(shown); toast('已複製'); } catch { toast('複製失敗，請長按文字複製'); } });
-  if (scene.line) {
-    const a = document.createElement('a'); a.className='act line'; a.target='_blank'; a.rel='noopener';
-    a.href = 'https://line.me/R/share?text=' + encodeURIComponent(shown); a.innerHTML='💚 用 LINE 傳送'; acts.appendChild(a);
-  }
-  if (scene.tts) { speak(shown); btn('🔊 再聽一次', () => speak(shown)); }
-
-  const evs = parseEvents(full);
-  if (evs.length) {
-    const box = document.createElement('div'); box.className='evs';
-    box.innerHTML = '<b>📅 可加入行事曆</b>' + evs.map(e=>`<div class="ev">• ${esc(e.title)}｜${esc(e.start.replace('T',' '))}${e.rrule?'（重複）':''}</div>`).join('');
-    bub.appendChild(box);
-    btn('⬇️ 加入手機行事曆（.ics）', () => downloadICS(evs));
-    evs.forEach(e => { const a=document.createElement('a'); a.className='act'; a.target='_blank'; a.rel='noopener'; a.href=gcalLink(e); a.innerHTML='🗓️ Google 日曆：'+esc(e.title.slice(0,10)); acts.appendChild(a); });
-  }
-  bub.appendChild(acts);
-}
-
-/* ---------- calendar ---------- */
-function parseEvents(t){
-  const m = t.match(/```json\s*([\s\S]*?)```/); if (!m) return [];
-  try { const j = JSON.parse(m[1]); return (j.events||[]).filter(e => e && e.title && toUTC(e.start)); } catch { return []; }
-}
-function toUTC(s){ const m = String(s||'').match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/); return m ? new Date(Date.UTC(+m[1], m[2]-1, +m[3], m[4]-8, +m[5])) : null; }
-const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-const endOf = e => toUTC(e.end) || new Date(toUTC(e.start).getTime() + 36e5);
-const icsEsc = t => String(t||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
-function downloadICS(evs){
-  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AI Life Helper//TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
-  evs.forEach((e,i) => {
-    L.push('BEGIN:VEVENT', `UID:${Date.now()}-${i}@ai-life-helper`, 'DTSTAMP:'+fmt(new Date()), 'DTSTART:'+fmt(toUTC(e.start)), 'DTEND:'+fmt(endOf(e)), 'SUMMARY:'+icsEsc(e.title));
-    if (e.description) L.push('DESCRIPTION:'+icsEsc(e.description));
-    if (e.rrule) L.push('RRULE:'+String(e.rrule).replace(/^RRULE:/i,''));
-    L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(e.title),'TRIGGER:-PT10M','END:VALARM','END:VEVENT');
-  });
-  L.push('END:VCALENDAR');
-  const blob = new Blob([L.join('\r\n')], {type:'text/calendar;charset=utf-8'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (evs.length===1?evs[0].title:'行程') + '.ics';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-  toast('已產生行事曆檔，打開即可加入');
-}
-function gcalLink(e){
-  let u = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(e.title)
-    + '&dates=' + fmt(toUTC(e.start)) + '/' + fmt(endOf(e)) + '&ctz=Asia/Taipei';
-  if (e.description) u += '&details=' + encodeURIComponent(e.description);
-  if (e.rrule) u += '&recur=' + encodeURIComponent('RRULE:' + String(e.rrule).replace(/^RRULE:/i,''));
-  return u;
-}
-
-/* ---------- voice ---------- */
+/* ================= 語音輸入（瀏覽器內建，免費） ================= */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null;
-if (!SR) $('#micBtn').classList.add('hidden');
-$('#micBtn').onclick = () => rec ? stopRec() : startRec();
 function startRec(){
-  if (!SR) return;
-  rec = new SR(); rec.lang = scene?.lang ? $('#langSel').value : 'zh-TW'; rec.interimResults = true; rec.continuous = false;
-  const before = $('#ta').value;
-  rec.onresult = e => { let t=''; for (const r of e.results) t += r[0].transcript; $('#ta').value = (before ? before+' ' : '') + t; autosize(); };
+  rec = new SR(); rec.lang='zh-TW'; rec.interimResults=true;
+  const before = '';
+  rec.onresult = e => { let t=''; for (const r of e.results) t += r[0].transcript; $('#ta').value = before + t; refresh(); };
   rec.onerror = e => { if (e.error==='not-allowed') toast('請允許麥克風權限'); stopRec(); };
-  rec.onend = () => { $('#micBtn').classList.remove('rec'); rec = null; };
-  try { rec.start(); $('#micBtn').classList.add('rec'); toast(rec.lang==='zh-TW'?'請說話…':`請用${LANGS[rec.lang]}說…（說中文也可以）`); } catch { rec = null; }
+  rec.onend = () => { $('#micBtn')?.classList.remove('rec'); rec=null; };
+  try { rec.start(); $('#micBtn').classList.add('rec'); toast('請說話…'); } catch { rec=null; }
 }
-function stopRec(){ if (rec) { try { rec.stop(); } catch {} } $('#micBtn').classList.remove('rec'); rec = null; }
-function speak(text){
-  if (!('speechSynthesis' in window)) return;
-  const say = text.split(/\n\s*---\s*\n|\n---/)[0].replace(/[*#`]/g,'').trim();
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(say);
-  u.lang = scene?.lang ? $('#langSel').value : 'zh-TW'; u.rate = .95;
-  const v = speechSynthesis.getVoices().find(v => v.lang.replace('_','-').startsWith(u.lang)); if (v) u.voice = v;
-  speechSynthesis.speak(u);
+function stopRec(){ if (rec) { try{rec.stop();}catch{} } $('#micBtn')?.classList.remove('rec'); rec=null; }
+
+/* ================= 行事曆（本機產生，不用 AI） ================= */
+function calForm(){
+  const d = new Date(Date.now()+8*3600e3+86400e3).toISOString().slice(0,10);
+  const reminder = scene.calFirst;
+  return `<div class="step" id="calForm"><h4><i>📅</i>${reminder?'直接設定提醒':'加入行事曆'}</h4>
+    <div class="form">
+      <label>事項<input id="cTitle" placeholder="${reminder?'繳電費':'跟客戶吃飯'}"></label>
+      <div class="two"><label>日期<input type="date" id="cDate" value="${d}"></label><label>時間<input type="time" id="cTime" value="09:00"></label></div>
+      <div class="two"><label>重複<select id="cRep"><option value="">不重複</option><option value="DAILY">每天</option><option value="WEEKLY">每週</option><option value="MONTHLY"${reminder?' selected':''}>每月</option><option value="YEARLY">每年</option></select></label>
+      <label>長度<select id="cDur"><option value="15">15 分鐘</option><option value="30">30 分鐘</option><option value="60"${reminder?'':' selected'}>1 小時</option><option value="120">2 小時</option></select></label></div>
+      <div class="ais"><button class="ai gemini" id="cGcal">🗓️ Google 日曆</button><button class="ai claude" id="cIcs">📱 手機行事曆<small>下載 .ics</small></button></div>
+    </div></div>`;
+}
+function bindCal(){
+  $('#cGcal').onclick = () => { const e=readCal(); if(e) openUrl(gcalLink(e)); };
+  $('#cIcs').onclick = () => { const e=readCal(); if(e) downloadICS(e); };
+}
+function readCal(){
+  const title=$('#cTitle').value.trim(), date=$('#cDate').value, time=$('#cTime').value||'09:00';
+  if (!title) { toast('請先填寫事項'); $('#cTitle').focus(); return null; }
+  if (!date) { toast('請選擇日期'); return null; }
+  const [y,m,d]=date.split('-').map(Number), [hh,mm]=time.split(':').map(Number);
+  const start = new Date(Date.UTC(y,m-1,d,hh-8,mm)), end = new Date(start.getTime() + (+$('#cDur').value)*60e3);
+  const freq = $('#cRep').value;
+  const rrule = freq ? `FREQ=${freq}` + (freq==='MONTHLY'?`;BYMONTHDAY=${d}`:'') : '';
+  return {title,start,end,rrule};
+}
+const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+const icsEsc = t => String(t||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
+function gcalLink(e){
+  let u = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(e.title) + '&dates=' + fmt(e.start) + '/' + fmt(e.end) + '&ctz=Asia/Taipei';
+  if (e.rrule) u += '&recur=' + encodeURIComponent('RRULE:' + e.rrule);
+  return u;
+}
+function downloadICS(e){
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AI Life Helper//TW','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+    `UID:${Date.now()}@ai-life-helper`,'DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(e.start),'DTEND:'+fmt(e.end),'SUMMARY:'+icsEsc(e.title)];
+  if (e.rrule) L.push('RRULE:'+e.rrule);
+  L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(e.title),'TRIGGER:-PT10M','END:VALARM','END:VEVENT','END:VCALENDAR');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([L.join('\r\n')], {type:'text/calendar;charset=utf-8'}));
+  a.download = e.title + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast(isAndroid ? '已下載，點通知列的檔案即可加入行事曆' : '已產生，打開即可加入行事曆', 3500);
 }
 
-/* ---------- settings ---------- */
-$('#gearBtn').onclick = openSettings;
-$('#cancelSet').onclick = () => $('#modal').classList.remove('open');
-$('#modal').addEventListener('click', e => { if (e.target.id==='modal') $('#modal').classList.remove('open'); });
-document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = syncMode);
-function syncMode(){ const m = document.querySelector('input[name=mode]:checked').value; $('#workerBox').classList.toggle('hidden', m!=='worker'); $('#directBox').classList.toggle('hidden', m!=='direct'); }
-function openSettings(){
-  document.querySelector(`input[name=mode][value=${settings.mode}]`).checked = true;
-  $('#workerUrl').value = settings.workerUrl; $('#accessCode').value = settings.accessCode;
-  $('#apiKey').value = settings.apiKey; $('#model').value = settings.model;
-  syncMode(); $('#modal').classList.add('open');
-}
-$('#saveSet').onclick = () => {
-  settings.mode = document.querySelector('input[name=mode]:checked').value;
-  settings.workerUrl = $('#workerUrl').value.trim() || DEFAULT_API; settings.accessCode = $('#accessCode').value.trim();
-  settings.apiKey = $('#apiKey').value.trim(); settings.model = $('#model').value.trim() || DEFAULT_MODEL;
-  saveSettings(); $('#modal').classList.remove('open'); toast(configured() ? '設定已儲存 ✅' : '還沒填寫連線資訊喔');
-};
+/* ================= 桌面捷徑 ?s=1~10 ================= */
+{ const n = +new URLSearchParams(location.search).get('s'); if (n>=1 && n<=SCENES.length) openScene(n-1); }
 
-/* ---------- toast ---------- */
-let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2200); }
-
-if ('speechSynthesis' in window) speechSynthesis.getVoices();
-
-/* 桌面捷徑：?s=1~10 直接開啟對應情境 */
-{ const n = +new URLSearchParams(location.search).get('s'); if (n >= 1 && n <= SCENES.length) openScene(SCENES[n-1]); }
-
-/* ---------- PWA：Android 安裝 / iPhone 加入主畫面 / 離線外殼 ---------- */
+/* ================= PWA 安裝 ================= */
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; if (!standalone) $('#installBar').classList.remove('hidden'); });
 $('#installBtn').onclick = async () => {
   if (deferredPrompt) { deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; deferredPrompt = null; if (r.outcome==='accepted') $('#installBar').classList.add('hidden'); }
-  else toast('請點瀏覽器的「分享」→「加入主畫面」');
+  else toast('請點 Safari 下方「分享」→「加入主畫面」');
 };
 window.addEventListener('appinstalled', () => { $('#installBar').classList.add('hidden'); toast('安裝完成！到桌面找「AI生活小幫手」'); });
-if (!standalone && /iPhone|iPad/.test(navigator.userAgent)) { $('#installTip').textContent = '點 Safari 下方「分享」→「加入主畫面」'; $('#installBtn').textContent = '怎麼裝'; $('#installBar').classList.remove('hidden'); }
+if (!standalone && isIOS) { $('#installTip').textContent='點 Safari 下方「分享」→「加入主畫面」'; $('#installBtn').textContent='怎麼裝'; $('#installBar').classList.remove('hidden'); }
 </script>
 </body>
 </html>
